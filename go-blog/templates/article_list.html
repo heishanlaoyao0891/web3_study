@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文章列表 - Go博客</title>
+    <style>
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .article-item { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
+        .article-title { font-size: 18px; font-weight: bold; }
+        .article-meta { color: #999; margin: 10px 0; }
+        .article-excerpt { color: #666; }
+        a { text-decoration: none; color: #007bff; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>文章列表</h1>
+    <a href="/">返回首页</a>
+</div>
+<div class="content">
+    {{ if .articles }}
+    {{ range .articles }}
+    <div class="article-item">
+        <div class="article-title">
+            <a href="/article/detail/{{ .ID }}">{{ .Title }}</a>
+        </div>
+        <div class="article-meta">
+            作者：{{ .User.Nickname }} | 分类：{{ .Category.Name }} | 发布时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+        </div>
+        <div class="article-excerpt">
+            {{ slice .Content 0 100 }} {{ if gt (len .Content) 100 }}...{{ end }}
+        </div>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div class="no-article">暂无文章，快去发布吧！</div>
+    {{ end }}
+</div>
+</body>
+</html>

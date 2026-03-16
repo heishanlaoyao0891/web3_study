@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }}</title>
+    <style>
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .nav { margin: 20px 0; }
+        .nav a { margin-right: 20px; text-decoration: none; color: #333; }
+        .nav a:hover { color: #007bff; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>{{ .title }}</h1>
+</div>
+<div class="nav">
+    <a href="/">首页</a>
+    <a href="/article/list">文章列表</a>
+</div>
+<div class="content">
+    <h3>欢迎使用Go Gin+Gorm搭建的博客系统</h3>
+    <p>基于Go内置模板引擎实现，无需前端框架</p>
+</div>
+</body>
+</html>
