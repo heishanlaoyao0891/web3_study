@@ -19,7 +19,7 @@ jobs:
             PROJECT_DIR="/root/gin-web/test"
             BIN_NAME="gin-web"
             LOG_FILE="app.log"
-            REPO_URL="https://github.com/heishanlaoyao0891/web3_study.git"  # GitHub仓库地址
+            REPO_URL="git@github.com:heishanlaoyao0891/web3_study.git"  # GitHub仓库地址
 
             echo "开始部署：清理旧项目文件"
             # 清理旧项目文件
