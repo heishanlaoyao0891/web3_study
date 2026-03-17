@@ -81,6 +81,13 @@
                 {{ .Content }}
             {{ end }}
         </div>
+        <div class="article-actions">
+            {{ if .user }}
+                {{ if or (eq .user.Username "admin") (eq .user.ID .User.ID) }}
+                <a href="/article/edit/{{ .ID }}" style="color: #007bff; text-decoration: none; margin-right: 10px;">编辑</a>
+                {{ end }}
+            {{ end }}
+        </div>
     </div>
     {{ end }}
     {{ else }}

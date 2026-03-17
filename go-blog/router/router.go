@@ -48,6 +48,8 @@ func InitRouter() *gin.Engine {
 		articleGroup.GET("/detail/:id", service.GetArticleDetail) // 文章详情
 		articleGroup.GET("/create", service.GetArticleCreate)     // 发布文章页面
 		articleGroup.POST("/create", service.PostArticleCreate)   // 处理发布文章请求
+		articleGroup.GET("/edit/:id", service.GetArticleEdit)     // 编辑文章页面
+		articleGroup.POST("/edit/:id", service.PostArticleEdit)   // 处理编辑文章请求
 	}
 
 	// 用户相关路由
