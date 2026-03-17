@@ -56,8 +56,12 @@
         <a href="/">首页</a>
         <a href="/article/list">文章列表</a>
         <a href="/article/create">发布文章</a>
-        <a href="/user/list">用户管理</a>
-        <a href="/category/list">类别管理</a>
+        {{ if .user }}
+            {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
+            <a href="/category/list">类别管理</a>
+            {{ end }}
+        {{ end }}
     </div>
     <div class="nav-right">
         {{ if .user }}
