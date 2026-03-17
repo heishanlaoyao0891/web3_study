@@ -48,10 +48,13 @@ func PostArticleCreate(c *gin.Context) {
 	fmt.Sscanf(categoryID, "%d", &categoryIDUint)
 
 	// 将visibility转换为int类型
+	println("表单提交的visibility值:", visibility)
 	visibilityInt, err := strconv.Atoi(visibility)
 	if err != nil {
+		println("转换错误:", err.Error())
 		visibilityInt = 1 // 默认公开
 	}
+	println("转换后的visibility值:", visibilityInt)
 
 	// 获取当前用户ID
 	userMap, ok := user.(map[string]interface{})
