@@ -7,6 +7,9 @@ on:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./go-blog  #项目目录
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
@@ -16,6 +19,7 @@ jobs:
         with:
           go-version: 1.22
           cache: true # 缓存 Go 依赖，加速编译
+          cache-dependency-path: go-blog/go.sum
 
       - name: 下载依赖
         run: go mod tidy
@@ -36,7 +40,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_PRIVATE_KEY }}
           # 传输 Actions 编译好的可执行文件到服务器指定目录
-          source: "gin-web"
+          source: "./go-blog/gin-web"
           target: "/root/gin-web/test/"
 
       - name: 服务器端启动服务
