@@ -87,42 +87,57 @@ func GetArticleList(c *gin.Context) {
 			}
 
 			if ok {
-				// 查询公开文章或自己的文章
-				query := util.Db.Preload("User").Preload("Category").Where("visibility = ? OR user_id = ?", 1, userID)
-				// 如果有搜索关键字，添加搜索条件
+				// 查询公开文章或自己的文章，并添加搜索条件
 				if keyword != "" {
-					query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
-				}
-				result := query.Find(&articles)
-				if result.Error != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-					return
+					// 带搜索条件
+					result := util.Db.Preload("User").Preload("Category").Where("(visibility = ? OR user_id = ?) AND (title LIKE ? OR content LIKE ?)", 1, userID, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
+					if result.Error != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+						return
+					}
+				} else {
+					// 不带搜索条件
+					result := util.Db.Preload("User").Preload("Category").Where("visibility = ? OR user_id = ?", 1, userID).Find(&articles)
+					if result.Error != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+						return
+					}
 				}
 			} else {
 				// 未获取到用户ID，只显示公开文章
-				query := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1)
-				// 如果有搜索关键字，添加搜索条件
 				if keyword != "" {
-					query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
-				}
-				result := query.Find(&articles)
-				if result.Error != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-					return
+					// 带搜索条件
+					result := util.Db.Preload("User").Preload("Category").Where("visibility = ? AND (title LIKE ? OR content LIKE ?)", 1, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
+					if result.Error != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+						return
+					}
+				} else {
+					// 不带搜索条件
+					result := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1).Find(&articles)
+					if result.Error != nil {
+						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+						return
+					}
 				}
 			}
 		}
 	} else {
 		// 未登录用户只能看到公开的文章
-		query := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1)
-		// 如果有搜索关键字，添加搜索条件
 		if keyword != "" {
-			query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
-		}
-		result := query.Find(&articles)
-		if result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-			return
+			// 带搜索条件
+			result := util.Db.Preload("User").Preload("Category").Where("visibility = ? AND (title LIKE ? OR content LIKE ?)", 1, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
+			if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+				return
+			}
+		} else {
+			// 不带搜索条件
+			result := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1).Find(&articles)
+			if result.Error != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+				return
+			}
 		}
 	}
 	// 渲染模板并传递数据
