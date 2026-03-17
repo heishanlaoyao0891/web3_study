@@ -79,7 +79,7 @@ func PostLogin(c *gin.Context) {
 	}
 
 	// 设置令牌到cookie中，过期时间为30分钟
-	c.SetCookie("token", token, 30*60, "/", "localhost", false, true)
+	c.SetCookie("token", token, 30*60, "/", "", false, true)
 
 	// 重定向到首页
 	c.Redirect(http.StatusFound, "/")
@@ -246,7 +246,7 @@ func GetLogout(c *gin.Context) {
 	}
 
 	// 清除cookie中的令牌
-	c.SetCookie("token", "", -1, "/", "localhost", false, true)
+	c.SetCookie("token", "", -1, "/", "", false, true)
 
 	// 重定向到首页
 	c.Redirect(http.StatusFound, "/")

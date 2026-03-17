@@ -2,6 +2,7 @@ package util
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strconv"
 	"time"
@@ -53,6 +54,9 @@ func InitRedis(fileName string) error {
 
 // SetUserSession 设置用户会话
 func SetUserSession(userID uint, token string) error {
+	if RedisClient == nil {
+		return errors.New("redis client not initialized")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -67,6 +71,9 @@ func SetUserSession(userID uint, token string) error {
 
 // GetUserSession 获取用户会话
 func GetUserSession(userID uint) (string, error) {
+	if RedisClient == nil {
+		return "", errors.New("redis client not initialized")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

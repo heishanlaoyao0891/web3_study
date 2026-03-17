@@ -32,7 +32,7 @@ func GetUserFromContext(c *gin.Context) interface{} {
 					// 用户被禁用，删除会话
 					DeleteUserSession(claims.UserID)
 					// 清除cookie
-					c.SetCookie("token", "", -1, "/", "localhost", false, true)
+					c.SetCookie("token", "", -1, "/", "", false, true)
 				}
 			}
 		}

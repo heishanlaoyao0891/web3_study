@@ -75,6 +75,12 @@ jobs:
             echo "启动新服务..."
             # 后台启动，追加日志（用 >> 避免覆盖历史日志）
             nohup ./$BIN_NAME >> $LOG_FILE 2>&1 &
+            
+            # 显示环境变量，便于调试
+            echo "环境变量："
+            echo "REDIS_ADDR: $(echo $REDIS_ADDR)"
+            echo "REDIS_PASSWORD: $(echo $REDIS_PASSWORD)"
+            echo "REDIS_DB: $(echo $REDIS_DB)"
             sleep 2
 
             # 验证服务状态
