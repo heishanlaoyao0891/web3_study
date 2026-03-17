@@ -54,11 +54,16 @@ func PostArticleCreate(c *gin.Context) {
 	userMap, ok := user.(map[string]interface{})
 	var userID uint
 	if ok {
-		// 从map中获取用户ID
-		userIDFloat, ok := userMap["ID"].(float64)
-		if ok {
-			userID = uint(userIDFloat)
-		} else {
+		// 尝试获取用户ID，处理不同类型
+		idValue := userMap["ID"]
+		switch v := idValue.(type) {
+		case uint:
+			userID = v
+		case float64:
+			userID = uint(v)
+		case int:
+			userID = uint(v)
+		default:
 			userID = 1 // 默认使用admin用户
 		}
 	} else {
