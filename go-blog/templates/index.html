@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }}</title>
+    <style>
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .nav { 
+            margin: 20px 0; 
+            background-color: #f8f9fa; 
+            padding: 15px 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .nav-left { display: flex; align-items: center; }
+        .nav-right { display: flex; align-items: center; }
+        .nav a { 
+            margin-right: 25px; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 16px; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+        }
+        .nav a:hover { 
+            color: #007bff; 
+            transform: translateY(-1px); 
+        }
+        .nav span { 
+            margin-right: 25px; 
+            color: #666; 
+            font-size: 14px; 
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>{{ .title }}</h1>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章列表</a>
+        <a href="/article/create">发布文章</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
+            {{ end }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+<div class="content">
+    <h3>欢迎使用Go Gin+Gorm搭建的博客系统</h3>
+    <p>基于Go内置模板引擎实现，无需前端框架</p>
+</div>
+</body>
+</html>

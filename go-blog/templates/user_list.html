@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理 - Go博客</title>
+    <style>
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .nav { 
+            margin: 20px 0; 
+            background-color: #f8f9fa; 
+            padding: 15px 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .nav-left { display: flex; align-items: center; }
+        .nav-right { display: flex; align-items: center; }
+        .nav a { 
+            margin-right: 25px; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 16px; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+        }
+        .nav a:hover { 
+            color: #007bff; 
+            transform: translateY(-1px); 
+        }
+        .nav span { 
+            margin-right: 25px; 
+            color: #666; 
+            font-size: 14px; 
+        }
+        .user-item { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
+        .user-info { display: flex; justify-content: space-between; align-items: center; }
+        .btn { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #218838; }
+        .disable-form { display: inline; }
+        .disable-select { padding: 3px 5px; border: 1px solid #ddd; border-radius: 3px; margin-right: 5px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>用户管理</h1>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章列表</a>
+        <a href="/article/create">发布文章</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
+            {{ end }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+<div class="content">
+    {{ if .users }}
+    {{ range .users }}
+    <div class="user-item">
+        <div class="user-info">
+            <div>
+                <strong>用户名：{{ .Username }}</strong> | 昵称：{{ .Nickname }} | 注册时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+                {{ if eq .Status 0 }}
+                | 状态：<span style="color: red;">已禁用</span>
+                {{ if .DisableUntil }}
+                {{ if .DisableUntil.After (now) }}
+                | 禁用至：{{ .DisableUntil.Format "2006-01-02 15:04:05" }}
+                {{ else }}
+                | 状态：<span style="color: orange;">待恢复</span>
+                {{ end }}
+                {{ else }}
+                | 永久禁用
+                {{ end }}
+                {{ else }}
+                | 状态：<span style="color: green;">正常</span>
+                {{ end }}
+            </div>
+            {{ if ne .Username "admin" }}
+            {{ if eq .Status 1 }}
+            <form action="/user/disable" method="post" class="disable-form">
+                <input type="hidden" name="id" value="{{ .ID }}">
+                <select name="disable_time" class="disable-select">
+                    <option value="5">5分钟</option>
+                    <option value="15">15分钟</option>
+                    <option value="30">30分钟</option>
+                    <option value="60">60分钟</option>
+                    <option value="1440">1小时</option>
+                    <option value="4320">3小时</option>
+                    <option value="8640">6小时</option>
+                    <option value="17280">24小时</option>
+                    <option value="0">永久禁用</option>
+                </select>
+                <button type="submit" class="btn btn-danger">禁用</button>
+            </form>
+            {{ else }}
+            <form action="/user/restore" method="post" style="display: inline;">
+                <input type="hidden" name="id" value="{{ .ID }}">
+                <button type="submit" class="btn btn-success">恢复</button>
+            </form>
+            {{ end }}
+            {{ end }}
+        </div>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div class="no-user">暂无用户</div>
+    {{ end }}
+</div>
+</body>
+</html>
