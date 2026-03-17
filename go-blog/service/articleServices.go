@@ -38,9 +38,27 @@ func GetArticleList(c *gin.Context) {
 			}
 		} else {
 			// 普通用户可以看到公开的文章和自己的私有文章
-			userIDFloat, ok := userMap["ID"].(float64)
+			// 尝试获取用户ID，处理不同类型
+			var userID uint
+			var ok bool
+
+			// 检查ID的类型
+			idValue := userMap["ID"]
+			switch v := idValue.(type) {
+			case uint:
+				userID = v
+				ok = true
+			case float64:
+				userID = uint(v)
+				ok = true
+			case int:
+				userID = uint(v)
+				ok = true
+			default:
+				ok = false
+			}
+
 			if ok {
-				userID := uint(userIDFloat)
 				// 查询公开文章或自己的文章
 				result := util.Db.Preload("User").Preload("Category").Where("visibility = ? OR user_id = ?", 1, userID).Find(&articles)
 				if result.Error != nil {
@@ -116,8 +134,27 @@ func GetArticleDetail(c *gin.Context) {
 			// 管理员可以访问所有文章
 		} else {
 			// 检查是否是文章作者
-			userIDFloat, ok := userMap["ID"].(float64)
-			if !ok || uint(userIDFloat) != article.UserID {
+			// 尝试获取用户ID，处理不同类型
+			var userID uint
+			var ok bool
+
+			// 检查ID的类型
+			idValue := userMap["ID"]
+			switch v := idValue.(type) {
+			case uint:
+				userID = v
+				ok = true
+			case float64:
+				userID = uint(v)
+				ok = true
+			case int:
+				userID = uint(v)
+				ok = true
+			default:
+				ok = false
+			}
+
+			if !ok || userID != article.UserID {
 				c.HTML(http.StatusForbidden, "index.html", gin.H{
 					"title": "错误 - Go博客",
 					"error": "无权限访问此文章",
