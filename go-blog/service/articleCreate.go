@@ -5,6 +5,7 @@ import (
 	"go-blog/model"
 	"go-blog/util"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -47,8 +48,10 @@ func PostArticleCreate(c *gin.Context) {
 	fmt.Sscanf(categoryID, "%d", &categoryIDUint)
 
 	// 将visibility转换为int类型
-	var visibilityInt int
-	fmt.Sscanf(visibility, "%d", &visibilityInt)
+	visibilityInt, err := strconv.Atoi(visibility)
+	if err != nil {
+		visibilityInt = 1 // 默认公开
+	}
 
 	// 获取当前用户ID
 	userMap, ok := user.(map[string]interface{})
