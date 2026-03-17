@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ if .category.ID }}编辑类别{{ else }}添加类别{{ end }} - Go博客</title>
+    <style>
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
+        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .nav { 
+            margin: 20px 0; 
+            background-color: #f8f9fa; 
+            padding: 15px 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .nav-left { display: flex; align-items: center; }
+        .nav-right { display: flex; align-items: center; }
+        .nav a { 
+            margin-right: 25px; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 16px; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+        }
+        .nav a:hover { 
+            color: #007bff; 
+            transform: translateY(-1px); 
+        }
+        .nav span { 
+            margin-right: 25px; 
+            color: #666; 
+            font-size: 14px; 
+        }
+        .content { max-width: 600px; margin: 0 auto; }
+        .form-group { margin: 20px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-group textarea { height: 100px; resize: vertical; }
+        .btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background-color: #0069d9; }
+        .btn-secondary { background-color: #6c757d; margin-right: 10px; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .error { color: red; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>{{ if .category.ID }}编辑类别{{ else }}添加类别{{ end }}</h1>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章列表</a>
+        <a href="/article/create">发布文章</a>
+        <a href="/user/list">用户管理</a>
+        <a href="/category/list">类别管理</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
+            {{ end }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+<div class="content">
+    {{ if .error }}
+    <div class="error">{{ .error }}</div>
+    {{ end }}
+    <form action="{{ if .category.ID }}/category/edit/{{ .category.ID }}{{ else }}/category/create{{ end }}" method="post">
+        <div class="form-group">
+            <label for="name">类别名称</label>
+            <input type="text" id="name" name="name" value="{{ .category.Name }}" required>
+        </div>
+        <div class="form-group">
+            <label for="desc">类别描述</label>
+            <textarea id="desc" name="desc">{{ .category.Desc }}</textarea>
+        </div>
+        <div class="form-group">
+            <a href="/category/list" class="btn btn-secondary">取消</a>
+            <button type="submit" class="btn">保存</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

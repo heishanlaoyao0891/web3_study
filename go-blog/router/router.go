@@ -60,6 +60,16 @@ func InitRouter() *gin.Engine {
 		userGroup.POST("/restore", service.PostRestoreUser) // 恢复用户（管理员）
 	}
 
+	// 类别相关路由
+	categoryGroup := r.Group("/category")
+	{
+		categoryGroup.GET("/list", service.GetCategoryList)       // 类别列表（管理员）
+		categoryGroup.GET("/create", service.GetCategoryCreate)   // 添加类别页面（管理员）
+		categoryGroup.POST("/create", service.PostCategoryCreate) // 处理添加类别请求（管理员）
+		categoryGroup.GET("/edit/:id", service.GetCategoryEdit)   // 编辑类别页面（管理员）
+		categoryGroup.POST("/edit/:id", service.PostCategoryEdit) // 处理编辑类别请求（管理员）
+	}
+
 	// 登录注册路由
 	r.GET("/login", service.GetLogin)         // 登录页面
 	r.POST("/login", service.PostLogin)       // 处理登录请求
