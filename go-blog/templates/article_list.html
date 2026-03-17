@@ -67,6 +67,16 @@
         {{ end }}
     </div>
 </div>
+<div class="search-container" style="margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <form action="/article/list" method="get" style="display: flex; align-items: center;">
+        <input type="text" name="keyword" placeholder="搜索文章标题或内容" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
+        <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">搜索</button>
+    </form>
+    {{ if .keyword }}
+    <p style="margin-top: 10px; color: #666; font-size: 14px;">搜索结果：{{ .keyword }}</p>
+    {{ end }}
+</div>
+
 <div class="content">
     {{ if .articles }}
     {{ range .articles }}
