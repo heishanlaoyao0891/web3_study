@@ -15,10 +15,29 @@ func GetIndex(c *gin.Context) {
 	// 从上下文中获取用户信息
 	user := util.GetUserFromContext(c)
 
+	// 获取统计数据
+	var articleCount int64
+	var categoryCount int64
+	var userCount int64
+
+	util.Db.Model(&model.Article{}).Count(&articleCount)
+	util.Db.Model(&model.Category{}).Count(&categoryCount)
+	util.Db.Model(&model.User{}).Count(&userCount)
+
+	// 获取最新文章（最多5篇）
+	var latestArticles []model.Article
+	util.Db.Preload("User").Preload("Category").Order("created_at desc").Limit(5).Find(&latestArticles)
+
 	// 跳转到首页模板
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Go博客首页",
 		"user":  user,
+		"stats": map[string]interface{}{
+			"articleCount":  articleCount,
+			"categoryCount": categoryCount,
+			"userCount":     userCount,
+		},
+		"latestArticles": latestArticles,
 	})
 }
 

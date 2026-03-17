@@ -5,7 +5,9 @@
     <title>{{ .title }}</title>
     <style>
         body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .header { text-align: center; padding: 40px 20px; border-bottom: 1px solid #eee; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; margin-bottom: 30px; }
+        .header h1 { font-size: 36px; margin-bottom: 10px; }
+        .header p { font-size: 18px; opacity: 0.9; }
         .nav { 
             margin: 20px 0; 
             background-color: #f8f9fa; 
@@ -35,11 +37,29 @@
             color: #666; 
             font-size: 14px; 
         }
+        .content { margin-top: 30px; }
+        .intro-section { background-color: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px; }
+        .intro-section h2 { color: #333; margin-bottom: 15px; }
+        .intro-section p { color: #666; line-height: 1.6; margin-bottom: 10px; }
+        .stats-section { display: flex; justify-content: space-around; margin-bottom: 30px; }
+        .stat-card { background-color: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; flex: 1; margin: 0 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card h3 { color: #333; margin-bottom: 10px; }
+        .stat-card p { font-size: 24px; font-weight: bold; color: #007bff; }
+        .latest-articles { margin-bottom: 30px; }
+        .latest-articles h2 { color: #333; margin-bottom: 20px; }
+        .article-card { background-color: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .article-card h3 { margin-bottom: 10px; }
+        .article-card h3 a { text-decoration: none; color: #333; transition: color 0.3s ease; }
+        .article-card h3 a:hover { color: #007bff; }
+        .article-meta { color: #999; font-size: 14px; margin-bottom: 10px; }
+        .article-excerpt { color: #666; line-height: 1.5; }
+        .footer { text-align: center; padding: 30px 0; border-top: 1px solid #eee; margin-top: 50px; color: #666; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>{{ .title }}</h1>
+    <p>分享知识，记录生活，探索技术的无限可能</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -48,6 +68,7 @@
         <a href="/article/create">发布文章</a>
         {{ if .user }}
             {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
             <a href="/category/list">类别管理</a>
             {{ end }}
         {{ end }}
@@ -63,8 +84,57 @@
     </div>
 </div>
 <div class="content">
-    <h3>欢迎使用Go Gin+Gorm搭建的博客系统</h3>
-    <p>基于Go内置模板引擎实现，无需前端框架</p>
+    <div class="intro-section">
+        <h2>关于本博客</h2>
+        <p>这是一个基于 Go 语言、Gin 框架和 GORM 开发的个人博客系统，旨在提供一个简洁、高效的内容管理平台。</p>
+        <p>系统特点：</p>
+        <p>• 支持用户注册、登录和权限管理</p>
+        <p>• 支持文章发布、编辑和分类管理</p>
+        <p>• 支持文章可见性设置（公开/仅自己可见）</p>
+        <p>• 支持用户管理和禁用功能</p>
+        <p>• 响应式设计，界面美观</p>
+    </div>
+    
+    <div class="stats-section">
+        <div class="stat-card">
+            <h3>文章总数</h3>
+            <p>{{ .stats.articleCount }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>分类数量</h3>
+            <p>{{ .stats.categoryCount }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>用户数量</h3>
+            <p>{{ .stats.userCount }}</p>
+        </div>
+    </div>
+    
+    <div class="latest-articles">
+        <h2>最新文章</h2>
+        {{ if .latestArticles }}
+            {{ range .latestArticles }}
+            <div class="article-card">
+                <h3><a href="/article/detail/{{ .ID }}">{{ .Title }}</a></h3>
+                <div class="article-meta">
+                    作者：{{ .User.Nickname }} | 分类：{{ .Category.Name }} | 发布时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+                </div>
+                <div class="article-excerpt">
+                    {{ if gt (len .Content) 150 }}
+                        {{ slice .Content 0 150 }}...
+                    {{ else }}
+                        {{ .Content }}
+                    {{ end }}
+                </div>
+            </div>
+            {{ end }}
+        {{ else }}
+            <p>暂无文章，快去发布第一篇文章吧！</p>
+        {{ end }}
+    </div>
+</div>
+<div class="footer">
+    <p>© 2026 Go 博客系统 | 基于 Go + Gin + GORM 开发</p>
 </div>
 </body>
 </html>
