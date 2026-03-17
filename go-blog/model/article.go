@@ -12,6 +12,7 @@ type Article struct {
 	Title      string         `gorm:"size:100;not null" json:"title"`    // 文章标题
 	Content    string         `gorm:"type:text;not null" json:"content"` // 文章内容
 	Status     int            `gorm:"default:1" json:"status"`           // 状态：1-发布，0-草稿
+	Visibility int            `gorm:"default:1" json:"visibility"`       // 可见性：1-公开，0-仅自己可见
 	UserID     uint           `gorm:"not null" json:"user_id"`           // 外键：关联用户
 	CategoryID uint           `gorm:"not null" json:"category_id"`       // 外键：关联分类
 	CreatedAt  time.Time      `json:"created_at"`

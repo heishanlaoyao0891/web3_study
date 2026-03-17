@@ -4,19 +4,65 @@
     <meta charset="UTF-8">
     <title>文章列表 - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
         .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
+        .nav { 
+            margin: 20px 0; 
+            background-color: #f8f9fa; 
+            padding: 15px 20px; 
+            border-radius: 5px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .nav-left { display: flex; align-items: center; }
+        .nav-right { display: flex; align-items: center; }
+        .nav a { 
+            margin-right: 25px; 
+            text-decoration: none; 
+            color: #333; 
+            font-size: 16px; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+        }
+        .nav a:hover { 
+            color: #007bff; 
+            transform: translateY(-1px); 
+        }
+        .nav span { 
+            margin-right: 25px; 
+            color: #666; 
+            font-size: 14px; 
+        }
         .article-item { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
         .article-title { font-size: 18px; font-weight: bold; }
         .article-meta { color: #999; margin: 10px 0; }
         .article-excerpt { color: #666; }
-        a { text-decoration: none; color: #007bff; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>文章列表</h1>
-    <a href="/">返回首页</a>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章列表</a>
+        <a href="/article/create">发布文章</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            {{ if eq .user.Username "admin" }}
+            <a href="/user/list">用户管理</a>
+            {{ end }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
 </div>
 <div class="content">
     {{ if .articles }}
@@ -29,7 +75,11 @@
             作者：{{ .User.Nickname }} | 分类：{{ .Category.Name }} | 发布时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
         </div>
         <div class="article-excerpt">
-            {{ slice .Content 0 100 }} {{ if gt (len .Content) 100 }}...{{ end }}
+            {{ if gt (len .Content) 100 }}
+                {{ slice .Content 0 100 }}...
+            {{ else }}
+                {{ .Content }}
+            {{ end }}
         </div>
     </div>
     {{ end }}

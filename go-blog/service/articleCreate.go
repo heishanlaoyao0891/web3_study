@@ -1,0 +1,81 @@
+package service
+
+import (
+	"fmt"
+	"go-blog/model"
+	"go-blog/util"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+// GetArticleCreate 显示发布文章页面
+func GetArticleCreate(c *gin.Context) {
+	// 从上下文中获取用户信息
+	user := util.GetUserFromContext(c)
+
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	var categories []model.Category
+	util.Db.Find(&categories)
+	c.HTML(http.StatusOK, "article_create.html", gin.H{
+		"categories": categories,
+		"user":       user,
+	})
+}
+
+// PostArticleCreate 处理发布文章请求
+func PostArticleCreate(c *gin.Context) {
+	// 从上下文中获取用户信息
+	user := util.GetUserFromContext(c)
+
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+	categoryID := c.PostForm("category_id")
+	visibility := c.PostForm("visibility")
+
+	// 将categoryID转换为uint类型
+	var categoryIDUint uint
+	fmt.Sscanf(categoryID, "%d", &categoryIDUint)
+
+	// 将visibility转换为int类型
+	var visibilityInt int
+	fmt.Sscanf(visibility, "%d", &visibilityInt)
+
+	// 获取当前用户ID
+	userMap, ok := user.(map[string]interface{})
+	var userID uint
+	if ok {
+		// 从map中获取用户ID
+		userIDFloat, ok := userMap["ID"].(float64)
+		if ok {
+			userID = uint(userIDFloat)
+		} else {
+			userID = 1 // 默认使用admin用户
+		}
+	} else {
+		userID = 1 // 默认使用admin用户
+	}
+
+	article := model.Article{
+		Title:      title,
+		Content:    content,
+		Status:     1,
+		Visibility: visibilityInt,
+		UserID:     userID,
+		CategoryID: categoryIDUint,
+	}
+
+	util.Db.Create(&article)
+
+	// 重定向到文章列表页面
+	c.Redirect(http.StatusFound, "/article/list")
+}
