@@ -60,9 +60,6 @@
     </div>
     <div class="nav-right">
         {{ if .user }}
-            {{ if eq .user.Username "admin" }}
-            <a href="/user/list">用户管理</a>
-            {{ end }}
             <span>欢迎，{{ .user.Username }}</span>
             <a href="/logout">登出</a>
         {{ else }}
