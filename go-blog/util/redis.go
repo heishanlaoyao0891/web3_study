@@ -69,7 +69,7 @@ func SetUserSession(userID uint, token string) error {
 	return nil
 }
 
-// GetUserSession 获取用户会话
+// GetUserSession 获取用户会话（支持自动续期）
 func GetUserSession(userID uint) (string, error) {
 	if RedisClient == nil {
 		return "", errors.New("redis client not initialized")
@@ -81,6 +81,13 @@ func GetUserSession(userID uint) (string, error) {
 	token, err := RedisClient.Get(ctx, "user:"+strconv.Itoa(int(userID))).Result()
 	if err != nil {
 		return "", err
+	}
+
+	// 检查 token 是否即将过期（剩余时间不足 10 分钟）
+	ttl, err := RedisClient.TTL(ctx, "user:"+strconv.Itoa(int(userID))).Result()
+	if err == nil && ttl < 10*time.Minute {
+		// 续期 token 到 30 分钟
+		RedisClient.Expire(ctx, "user:"+strconv.Itoa(int(userID)), 30*time.Minute)
 	}
 
 	return token, nil

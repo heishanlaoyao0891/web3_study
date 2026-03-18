@@ -21,7 +21,7 @@ func GetUserFromContext(c *gin.Context) interface{} {
 		// 解析JWT令牌
 		claims, err := ParseToken(token)
 		if err == nil {
-			// 从Redis中获取用户会话
+			// 从Redis中获取用户会话（会自动续期）
 			tokenFromRedis, err := GetUserSession(claims.UserID)
 			if err == nil && tokenFromRedis == token {
 				// 检查用户状态
@@ -35,6 +35,8 @@ func GetUserFromContext(c *gin.Context) interface{} {
 					}
 					// 将用户信息存储到Gin上下文中
 					c.Set("user", user)
+					// 更新cookie中的token过期时间（30分钟）
+					c.SetCookie("token", token, 30*60, "/", "", false, true)
 				} else {
 					// 用户被禁用，删除会话
 					DeleteUserSession(claims.UserID)
