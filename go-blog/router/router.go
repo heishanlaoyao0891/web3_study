@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"go-blog/service"
 	"html/template"
 	"strings"
@@ -18,7 +19,7 @@ func InitRouter() *gin.Engine {
 	// 配置session中间件
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
-
+	r.Use(loggerMiddleware())
 	// 注册自定义模板函数
 	r.SetFuncMap(template.FuncMap{
 		// 替换字符串（解决文章内容换行）
@@ -78,4 +79,21 @@ func InitRouter() *gin.Engine {
 	r.GET("/logout", service.GetLogout)       // 登出
 
 	return r
+}
+
+// 日志中间件
+func loggerMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+		path := c.Request.URL.Path
+		raw := c.Request.URL.RawQuery
+		method := c.Request.Method
+
+		c.Next()
+
+		since := time.Since(start)
+		clientIP := c.ClientIP()
+		status := c.Writer.Status()
+		fmt.Printf("[%s] %s %s %s %d %v\n", clientIP, path, raw, method, status, since)
+	}
 }
