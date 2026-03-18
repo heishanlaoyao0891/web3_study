@@ -129,19 +129,15 @@ func PostRegister(c *gin.Context) {
 
 // GetUserList 显示用户列表页面（仅管理员可见）
 func GetUserList(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
 	if !ok || userMap["Username"] != "admin" {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"error": "权限不足",
+			"user":  user,
 		})
 		return
 	}
@@ -158,19 +154,15 @@ func GetUserList(c *gin.Context) {
 
 // PostDisableUser 禁用用户（仅管理员可见）
 func PostDisableUser(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
 	if !ok || userMap["Username"] != "admin" {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"error": "权限不足",
+			"user":  user,
 		})
 		return
 	}
@@ -254,19 +246,15 @@ func GetLogout(c *gin.Context) {
 
 // PostRestoreUser 恢复用户（仅管理员可见）
 func PostRestoreUser(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
 	if !ok || userMap["Username"] != "admin" {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"error": "权限不足",
+			"user":  user,
 		})
 		return
 	}

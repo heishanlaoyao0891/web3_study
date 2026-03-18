@@ -12,13 +12,8 @@ import (
 
 // GetArticleCreate 显示发布文章页面
 func GetArticleCreate(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	var categories []model.Category
 	util.Db.Find(&categories)
@@ -30,13 +25,8 @@ func GetArticleCreate(c *gin.Context) {
 
 // PostArticleCreate 处理发布文章请求
 func PostArticleCreate(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	title := c.PostForm("title")
 	content := c.PostForm("content")

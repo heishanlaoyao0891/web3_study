@@ -10,13 +10,8 @@ import (
 
 // GetCategoryList 显示类别列表页面（仅管理员可见）
 func GetCategoryList(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
@@ -40,13 +35,8 @@ func GetCategoryList(c *gin.Context) {
 
 // GetCategoryCreate 显示添加类别页面（仅管理员可见）
 func GetCategoryCreate(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
@@ -67,13 +57,8 @@ func GetCategoryCreate(c *gin.Context) {
 
 // PostCategoryCreate 处理添加类别请求（仅管理员可见）
 func PostCategoryCreate(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
@@ -114,13 +99,8 @@ func PostCategoryCreate(c *gin.Context) {
 
 // GetCategoryEdit 显示编辑类别页面（仅管理员可见）
 func GetCategoryEdit(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})
@@ -156,13 +136,8 @@ func GetCategoryEdit(c *gin.Context) {
 
 // PostCategoryEdit 处理编辑类别请求（仅管理员可见）
 func PostCategoryEdit(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	// 检查是否是管理员
 	userMap, ok := user.(map[string]interface{})

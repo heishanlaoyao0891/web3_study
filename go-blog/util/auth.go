@@ -8,6 +8,11 @@ import (
 
 // GetUserFromContext 从上下文中获取用户信息
 func GetUserFromContext(c *gin.Context) interface{} {
+	// 先尝试从Gin上下文中获取用户信息
+	if user, exists := c.Get("user"); exists {
+		return user
+	}
+
 	// 从cookie中获取令牌
 	token, err := c.Cookie("token")
 	var user interface{}
@@ -28,6 +33,8 @@ func GetUserFromContext(c *gin.Context) interface{} {
 						"ID":       claims.UserID,
 						"Username": claims.Username,
 					}
+					// 将用户信息存储到Gin上下文中
+					c.Set("user", user)
 				} else {
 					// 用户被禁用，删除会话
 					DeleteUserSession(claims.UserID)

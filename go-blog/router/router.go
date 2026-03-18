@@ -2,6 +2,7 @@ package router
 
 import (
 	"go-blog/service"
+	"go-blog/util"
 	"html/template"
 	"log"
 	"net/http"
@@ -23,6 +24,8 @@ func InitRouter() *gin.Engine {
 	r.Use(sessions.Sessions("mysession", store))
 	r.Use(loggerMiddleware())
 	r.Use(recoveryMiddleware())
+	r.Use(authMiddleware()) // 全局认证中间件
+	r.Use(corsMiddleware()) // 全局跨域中间件
 	// 注册自定义模板函数
 	r.SetFuncMap(template.FuncMap{
 		// 替换字符串（解决文章内容换行）
@@ -48,24 +51,25 @@ func InitRouter() *gin.Engine {
 	// 文章相关路由
 	articleGroup := r.Group("/article")
 	{
-		articleGroup.GET("/list", service.GetArticleList)         // 文章列表
-		articleGroup.GET("/detail/:id", service.GetArticleDetail) // 文章详情
-		articleGroup.GET("/create", service.GetArticleCreate)     // 发布文章页面
-		articleGroup.POST("/create", service.PostArticleCreate)   // 处理发布文章请求
-		articleGroup.GET("/edit/:id", service.GetArticleEdit)     // 编辑文章页面
-		articleGroup.POST("/edit/:id", service.PostArticleEdit)   // 处理编辑文章请求
+		articleGroup.GET("/list", service.GetArticleList)         // 文章列表（不需要认证）
+		articleGroup.GET("/detail/:id", service.GetArticleDetail) // 文章详情（不需要认证）
+		// 发布和编辑文章需要认证
+		articleGroup.GET("/create", requireAuthMiddleware(), service.GetArticleCreate)   // 发布文章页面
+		articleGroup.POST("/create", requireAuthMiddleware(), service.PostArticleCreate) // 处理发布文章请求
+		articleGroup.GET("/edit/:id", requireAuthMiddleware(), service.GetArticleEdit)   // 编辑文章页面
+		articleGroup.POST("/edit/:id", requireAuthMiddleware(), service.PostArticleEdit) // 处理编辑文章请求
 	}
 
-	// 用户相关路由
-	userGroup := r.Group("/user")
+	// 用户相关路由（需要认证）
+	userGroup := r.Group("/user", requireAuthMiddleware())
 	{
 		userGroup.GET("/list", service.GetUserList)         // 用户列表（管理员）
 		userGroup.POST("/disable", service.PostDisableUser) // 禁用用户（管理员）
 		userGroup.POST("/restore", service.PostRestoreUser) // 恢复用户（管理员）
 	}
 
-	// 类别相关路由
-	categoryGroup := r.Group("/category")
+	// 类别相关路由（需要认证）
+	categoryGroup := r.Group("/category", requireAuthMiddleware())
 	{
 		categoryGroup.GET("/list", service.GetCategoryList)       // 类别列表（管理员）
 		categoryGroup.GET("/create", service.GetCategoryCreate)   // 添加类别页面（管理员）
@@ -75,11 +79,11 @@ func InitRouter() *gin.Engine {
 	}
 
 	// 登录注册路由
-	r.GET("/login", service.GetLogin)         // 登录页面
-	r.POST("/login", service.PostLogin)       // 处理登录请求
-	r.GET("/register", service.GetRegister)   // 注册页面
-	r.POST("/register", service.PostRegister) // 处理注册请求
-	r.GET("/logout", service.GetLogout)       // 登出
+	r.GET("/login", service.GetLogin)                            // 登录页面（不需要认证）
+	r.POST("/login", service.PostLogin)                          // 处理登录请求（不需要认证）
+	r.GET("/register", service.GetRegister)                      // 注册页面（不需要认证）
+	r.POST("/register", service.PostRegister)                    // 处理注册请求（不需要认证）
+	r.GET("/logout", requireAuthMiddleware(), service.GetLogout) // 登出（需要认证）
 
 	return r
 }
@@ -114,4 +118,49 @@ func recoveryMiddleware() gin.HandlerFunc {
 		})
 		c.Abort()
 	})
+}
+
+// 认证中间件
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 从上下文中获取用户信息
+		user := util.GetUserFromContext(c)
+		// 将用户信息存储到上下文中，方便后续处理函数使用
+		c.Set("user", user)
+		c.Next()
+	}
+}
+
+// 要求认证中间件（用于需要登录的路由）
+func requireAuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// 从上下文中获取用户信息
+		user := util.GetUserFromContext(c)
+		if user == nil {
+			// 未登录，重定向到登录页面
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
+			return
+		}
+		// 将用户信息存储到上下文中
+		c.Set("user", user)
+		c.Next()
+	}
+}
+
+// 跨域中间件
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }

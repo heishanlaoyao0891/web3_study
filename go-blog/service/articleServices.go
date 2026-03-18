@@ -233,13 +233,8 @@ func GetArticleDetail(c *gin.Context) {
 
 // GetArticleEdit 显示编辑文章页面
 func GetArticleEdit(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	id := c.Param("id")
 	var article model.Article
@@ -308,13 +303,8 @@ func GetArticleEdit(c *gin.Context) {
 
 // PostArticleEdit 处理编辑文章请求
 func PostArticleEdit(c *gin.Context) {
-	// 从上下文中获取用户信息
+	// 从上下文中获取用户信息（中间件已确保用户已登录）
 	user := util.GetUserFromContext(c)
-
-	if user == nil {
-		c.Redirect(http.StatusFound, "/login")
-		return
-	}
 
 	id := c.Param("id")
 	var article model.Article
