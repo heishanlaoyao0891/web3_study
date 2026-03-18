@@ -1,9 +1,11 @@
 package router
 
 import (
-	"fmt"
 	"go-blog/service"
 	"html/template"
+	"log"
+	"net/http"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -20,6 +22,7 @@ func InitRouter() *gin.Engine {
 	store := cookie.NewStore([]byte("secret"))
 	r.Use(sessions.Sessions("mysession", store))
 	r.Use(loggerMiddleware())
+	r.Use(recoveryMiddleware())
 	// 注册自定义模板函数
 	r.SetFuncMap(template.FuncMap{
 		// 替换字符串（解决文章内容换行）
@@ -94,6 +97,21 @@ func loggerMiddleware() gin.HandlerFunc {
 		since := time.Since(start)
 		clientIP := c.ClientIP()
 		status := c.Writer.Status()
-		fmt.Printf("[%s] %s %s %s %d %v\n", clientIP, path, raw, method, status, since)
+		log.Printf("[%s] %s %s %s %d %v\n", clientIP, path, raw, method, status, since)
 	}
+}
+
+// 全局异常中间件
+func recoveryMiddleware() gin.HandlerFunc {
+	return gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
+		// 记录异常信息
+		log.Printf("Panic recovered: %v", recovered)
+		// 可以添加堆栈信息
+		log.Printf("Stack trace: %s", debug.Stack())
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal Server Error",
+		})
+		c.Abort()
+	})
 }
