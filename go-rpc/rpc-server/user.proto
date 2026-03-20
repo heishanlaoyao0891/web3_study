@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+//生成的go文件代码路径
+option go_package ="rpc-server/pb";
+
+//定义包名
+package user;
+
+//定义消息结构
+message User{
+  string name =1;
+  int32 age =2;
+  bool is_vip =3;
+  repeated string tags =4;
+}
+
