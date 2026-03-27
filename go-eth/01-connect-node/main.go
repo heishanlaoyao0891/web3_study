@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// 你的Sepolia节点地址
+	// Sepolia节点地址
 	client, err := ethclient.Dial("https://eth-sepolia.g.alchemy.com/v2/eHJVP7yjzEB_1fq6yExoV")
 	if err != nil {
 		log.Fatal("节点连接失败：", err) // 失败则打印错误原因
