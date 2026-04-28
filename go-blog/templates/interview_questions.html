@@ -64,7 +64,13 @@
         </div>
         <div class="question-meta">
             <span class="difficulty-{{ .Difficulty }}">{{ if eq .Difficulty 1 }}简单{{ else if eq .Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
-            <span>分类: {{ .Category }}</span>
+            <span>分类: 
+                {{ if .Categories }}
+                    {{ range $index, $cat := .Categories }}{{ if $index }}, {{ end }}{{ $cat.Name }}{{ end }}
+                {{ else }}
+                    {{ .Category }}
+                {{ end }}
+            </span>
             <span>浏览: {{ .ViewCount }}</span>
         </div>
         <div class="question-content">{{ slice 0 100 .Content }}...</div>

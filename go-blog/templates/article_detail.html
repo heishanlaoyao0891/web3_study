@@ -79,7 +79,13 @@
     <h1 class="article-title">{{ .article.Title }}</h1>
     <div class="article-meta">
         <span>作者：{{ .article.User.Nickname }}</span>
-        <span>分类：{{ .article.Category.Name }}</span>
+        <span>分类：
+            {{ if .article.Categories }}
+                {{ range $index, $cat := .article.Categories }}{{ if $index }}, {{ end }}{{ $cat.Name }}{{ end }}
+            {{ else }}
+                {{ .article.Category.Name }}
+            {{ end }}
+        </span>
         <span>发布：{{ .article.CreatedAt.Format "2006-01-02 15:04" }}</span>
         {{ if eq .article.Visibility 0 }}
         <span style="background: #fff3cd; color: #856404;">私密文章</span>

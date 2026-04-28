@@ -92,6 +92,8 @@ func main() {
 		&model.Comment{},
 		&model.Tag{},
 		&model.ArticleTag{},
+		&model.ArticleCategory{},
+		&model.InterviewQuestionCategory{},
 		&model.Like{},
 		&model.Favorite{},
 		&model.Question{},

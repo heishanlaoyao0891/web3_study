@@ -24,5 +24,6 @@ type Article struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 	User          User           `gorm:"foreignKey:UserID" json:"user"`
 	Category      Category       `gorm:"foreignKey:CategoryID" json:"category"`
+	Categories    []Category     `gorm:"many2many:article_categories;" json:"categories"`
 	Tags          []Tag          `gorm:"many2many:article_tags;" json:"tags"`
 }

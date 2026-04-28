@@ -41,7 +41,7 @@ func GetIndex(c *gin.Context) {
 	util.Db.Model(&model.User{}).Count(&userCount)
 
 	var latestArticles []model.Article
-	util.Db.Preload("User").Preload("Category").Order("created_at desc").Limit(5).Find(&latestArticles)
+	util.Db.Preload("User").Preload("Category").Preload("Categories").Order("created_at desc").Limit(5).Find(&latestArticles)
 
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": "Go博客首页",
@@ -72,7 +72,7 @@ func GetArticleList(c *gin.Context) {
 	var total int64
 	var articles []model.Article
 
-	query := util.Db.Model(&model.Article{}).Preload("User").Preload("Category")
+	query := util.Db.Model(&model.Article{}).Preload("User").Preload("Category").Preload("Categories")
 
 	var userID uint
 	isAdmin := false
@@ -296,7 +296,7 @@ func PostArticleEdit(c *gin.Context) {
 
 	id := c.Param("id")
 	var article model.Article
-	result := util.Db.First(&article, id)
+	result := util.Db.Preload("User").Preload("Category").Preload("Categories").First(&article, id)
 	if result.Error != nil {
 		c.HTML(http.StatusNotFound, "index.html", gin.H{
 			"title": "错误 - Go博客",

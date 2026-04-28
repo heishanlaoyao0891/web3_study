@@ -112,7 +112,7 @@ func GetInterviewQuestions(c *gin.Context) {
 	difficulty := c.Query("difficulty")
 
 	var questions []model.InterviewQuestion
-	query := util.Db.Model(&model.InterviewQuestion{})
+	query := util.Db.Model(&model.InterviewQuestion{}).Preload("Categories")
 
 	if category != "" {
 		query = query.Where("category = ?", category)
@@ -123,7 +123,6 @@ func GetInterviewQuestions(c *gin.Context) {
 
 	result := query.Order("id desc").Find(&questions)
 	
-	// 调试日志
 	println("GetInterviewQuestions: found", len(questions), "questions, error:", result.Error)
 
 	var categories []string
@@ -142,7 +141,7 @@ func GetInterviewQuestionDetail(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 
 	var question model.InterviewQuestion
-	result := util.Db.Preload("User").First(&question, id)
+	result := util.Db.Preload("Categories").First(&question, id)
 
 	if result.Error != nil {
 		c.Redirect(http.StatusFound, "/interview")

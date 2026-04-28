@@ -37,7 +37,13 @@
     <div class="question-title">{{ .question.Title }}</div>
     <div class="question-meta">
         <span class="difficulty-{{ .question.Difficulty }}">{{ if eq .question.Difficulty 1 }}简单{{ else if eq .question.Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
-        <span>分类: {{ .question.Category }}</span>
+        <span>分类: 
+            {{ if .question.Categories }}
+                {{ range $index, $cat := .question.Categories }}{{ if $index }}, {{ end }}{{ $cat.Name }}{{ end }}
+            {{ else }}
+                {{ .question.Category }}
+            {{ end }}
+        </span>
         <span>浏览: {{ .question.ViewCount }}</span>
     </div>
     

@@ -38,6 +38,7 @@ type InterviewQuestion struct {
 	LikeCount  int            `gorm:"default:0" json:"like_count"`
 	UserID     uint           `gorm:"not null;index" json:"user_id"`
 	User       User           `gorm:"foreignKey:UserID" json:"user"`
+	Categories []Category     `gorm:"many2many:interview_question_categories;" json:"categories"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
