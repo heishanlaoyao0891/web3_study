@@ -49,6 +49,12 @@ jobs:
             echo "检查 Go 环境..."
             go version
 
+            echo "创建环境配置文件"
+            echo "MYSQL_DSN=root:Woshizhu?@tcp(124.223.6.26:3306)/go_blog?charset=utf8mb4&parseTime=True&loc=Local" > .env_prod
+            echo "REDIS_ADDR=124.223.6.26:6379" >> .env_prod
+            echo "REDIS_PASSWORD=Woshizhu?" >> .env_prod
+            echo "REDIS_DB=0" >> .env_prod
+
             echo "下载依赖"
             go mod tidy
 
