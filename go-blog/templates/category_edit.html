@@ -2,54 +2,34 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>{{ if .category.ID }}编辑类别{{ else }}添加类别{{ end }} - Go博客</title>
+    <title>{{ if .category.ID }}编辑分类{{ else }}添加分类{{ end }} - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .content { max-width: 600px; margin: 0 auto; }
-        .form-group { margin: 20px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .form-group textarea { height: 100px; resize: vertical; }
-        .btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .btn:hover { background-color: #0069d9; }
-        .btn-secondary { background-color: #6c757d; margin-right: 10px; }
-        .btn-secondary:hover { background-color: #5a6268; }
-        .error { color: red; margin: 10px 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .form-card { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; color: #333; font-weight: 600; font-size: 15px; }
+        .form-group input { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; min-height: 120px; resize: vertical; font-family: inherit; transition: all 0.3s; }
+        .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .btn { padding: 14px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #6c757d; }
+        .form-actions { display: flex; gap: 15px; margin-top: 30px; }
+        .error { padding: 12px 16px; background: #f8d7da; color: #721c24; border-radius: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 <div class="header">
-    <h1>{{ if .category.ID }}编辑类别{{ else }}添加类别{{ end }}</h1>
+    <h1>{{ if .category.ID }}编辑分类{{ else }}添加分类{{ end }}</h1>
+    <p>{{ if .category.ID }}修改分类信息{{ else }}创建新的文章分类{{ end }}</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -66,6 +46,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -73,20 +54,20 @@
         {{ end }}
     </div>
 </div>
-<div class="content">
+<div class="form-card">
     {{ if .error }}
     <div class="error">{{ .error }}</div>
     {{ end }}
     <form action="{{ if .category.ID }}/category/edit/{{ .category.ID }}{{ else }}/category/create{{ end }}" method="post">
         <div class="form-group">
-            <label for="name">类别名称</label>
-            <input type="text" id="name" name="name" value="{{ .category.Name }}" required>
+            <label for="name">分类名称</label>
+            <input type="text" id="name" name="name" value="{{ .category.Name }}" placeholder="请输入分类名称" required>
         </div>
         <div class="form-group">
-            <label for="desc">类别描述</label>
-            <textarea id="desc" name="desc">{{ .category.Desc }}</textarea>
+            <label for="desc">分类描述</label>
+            <textarea id="desc" name="desc" placeholder="请输入分类描述（可选）">{{ .category.Desc }}</textarea>
         </div>
-        <div class="form-group">
+        <div class="form-actions">
             <a href="/category/list" class="btn btn-secondary">取消</a>
             <button type="submit" class="btn">保存</button>
         </div>

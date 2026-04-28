@@ -285,3 +285,100 @@ func PostRestoreUser(c *gin.Context) {
 	// 重定向到用户列表页面
 	c.Redirect(http.StatusFound, "/user/list")
 }
+
+// GetProfile 显示用户资料页面
+func GetProfile(c *gin.Context) {
+	user := util.GetUserFromContext(c)
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	c.HTML(http.StatusOK, "profile.html", gin.H{
+		"user": user,
+	})
+}
+
+// PostProfile 更新用户资料
+func PostProfile(c *gin.Context) {
+	user := util.GetUserFromContext(c)
+	if user == nil {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	userMap, ok := user.(map[string]interface{})
+	if !ok {
+		c.HTML(http.StatusOK, "profile.html", gin.H{
+			"error": "用户信息错误",
+			"user":  user,
+		})
+		return
+	}
+
+	var userID uint
+	idValue := userMap["ID"]
+	switch v := idValue.(type) {
+	case uint:
+		userID = v
+	case float64:
+		userID = uint(v)
+	case int:
+		userID = uint(v)
+	default:
+		c.HTML(http.StatusOK, "profile.html", gin.H{
+			"error": "用户ID类型错误",
+			"user":  user,
+		})
+		return
+	}
+
+	nickname := c.PostForm("nickname")
+	oldPassword := c.PostForm("old_password")
+	newPassword := c.PostForm("new_password")
+
+	var dbUser model.User
+	result := util.Db.First(&dbUser, userID)
+	if result.Error != nil {
+		c.HTML(http.StatusOK, "profile.html", gin.H{
+			"error": "用户不存在",
+			"user":  user,
+		})
+		return
+	}
+
+	if nickname != "" {
+		dbUser.Nickname = nickname
+	}
+
+	if oldPassword != "" && newPassword != "" {
+		err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(oldPassword))
+		if err != nil {
+			c.HTML(http.StatusOK, "profile.html", gin.H{
+				"error": "原密码错误",
+				"user":  user,
+			})
+			return
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+		if err != nil {
+			c.HTML(http.StatusOK, "profile.html", gin.H{
+				"error": "密码加密失败",
+				"user":  user,
+			})
+			return
+		}
+		dbUser.Password = string(hashedPassword)
+	}
+
+	util.Db.Save(&dbUser)
+
+	userMap["Nickname"] = dbUser.Nickname
+	c.Set("user", userMap)
+
+	c.HTML(http.StatusOK, "profile.html", gin.H{
+		"success": "资料更新成功",
+		"user":    userMap,
+	})
+}

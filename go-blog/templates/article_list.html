@@ -4,46 +4,50 @@
     <meta charset="UTF-8">
     <title>文章列表 - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .article-item { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
-        .article-title { font-size: 18px; font-weight: bold; }
-        .article-meta { color: #999; margin: 10px 0; }
-        .article-excerpt { color: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .search-container { margin: 20px 0; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .search-form { display: flex; gap: 15px; }
+        .search-form input { flex: 1; padding: 12px 16px; border: 2px solid #e1e5eb; border-radius: 8px; font-size: 15px; transition: all 0.3s; }
+        .search-form input:focus { outline: none; border-color: #667eea; }
+        .search-form button { padding: 12px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .search-form button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .search-keyword { margin-top: 15px; color: #666; font-size: 14px; }
+        .search-keyword strong { color: #667eea; }
+        .article-item { margin: 15px 0; padding: 25px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .article-item:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .article-title { font-size: 20px; font-weight: 600; margin-bottom: 12px; }
+        .article-title a { text-decoration: none; color: #1a1a2e; transition: color 0.3s; }
+        .article-title a:hover { color: #667eea; }
+        .article-meta { color: #888; margin-bottom: 12px; font-size: 14px; display: flex; flex-wrap: wrap; gap: 15px; }
+        .article-meta span { background: #f5f7fa; padding: 4px 10px; border-radius: 15px; }
+        .article-excerpt { color: #555; line-height: 1.6; margin-bottom: 15px; }
+        .article-actions { padding-top: 15px; border-top: 1px solid #f0f2f5; }
+        .article-actions a { color: #667eea; text-decoration: none; margin-right: 15px; font-weight: 500; font-size: 14px; }
+        .article-actions a:hover { text-decoration: underline; }
+        .article-actions form { display: inline; }
+        .article-actions button { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 14px; font-weight: 500; }
+        .article-actions button:hover { text-decoration: underline; }
+        .visibility-badge { background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 30px 0; flex-wrap: wrap; }
+        .pagination a, .pagination span { padding: 10px 16px; background: white; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .pagination a:hover { background: #667eea; color: white; }
+        .pagination .active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .pagination .disabled { color: #ccc; cursor: not-allowed; }
+        .no-article { text-align: center; padding: 60px; color: #999; font-size: 16px; background: white; border-radius: 12px; }
+        .stats-info { text-align: center; color: #888; margin-bottom: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>文章列表</h1>
+    <p>探索精彩内容，发现技术之美</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -60,6 +64,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -67,44 +72,88 @@
         {{ end }}
     </div>
 </div>
-<div class="search-container" style="margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <form action="/article/list" method="get" style="display: flex; align-items: center;">
-        <input type="text" name="keyword" placeholder="搜索文章标题或内容" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
-        <button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">搜索</button>
+
+<div class="search-container">
+    <form class="search-form" action="/article/list" method="get">
+        <input type="text" name="keyword" value="{{ .keyword }}" placeholder="搜索文章标题或内容...">
+        <button type="submit">搜索</button>
     </form>
     {{ if .keyword }}
-    <p style="margin-top: 10px; color: #666; font-size: 14px;">搜索结果：{{ .keyword }}</p>
+    <p class="search-keyword">搜索关键词：<strong>{{ .keyword }}</strong></p>
     {{ end }}
 </div>
+
+{{ if .articles }}
+<p class="stats-info">共找到 {{ .total }} 篇文章</p>
+{{ end }}
 
 <div class="content">
     {{ if .articles }}
     {{ range .articles }}
     <div class="article-item">
-        <div class="article-title">
+        <h2 class="article-title">
             <a href="/article/detail/{{ .ID }}">{{ .Title }}</a>
-        </div>
+            {{ if eq .Visibility 0 }}
+            <span class="visibility-badge">私密</span>
+            {{ end }}
+        </h2>
         <div class="article-meta">
-            作者：{{ .User.Nickname }} | 分类：{{ .Category.Name }} | 发布时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+            <span>{{ .User.Nickname }}</span>
+            <span>{{ .Category.Name }}</span>
+            <span>{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
         </div>
         <div class="article-excerpt">
-            {{ if gt (len .Content) 100 }}
-                {{ slice .Content 0 100 }}...
+            {{ if gt (len .Content) 150 }}
+                {{ slice .Content 0 150 }}...
             {{ else }}
                 {{ .Content }}
             {{ end }}
         </div>
+        {{ if $.user }}
         <div class="article-actions">
-            {{ if $.user }}
-                {{ if or (eq $.user.Username "admin") (eq $.user.ID .User.ID) }}
-                <a href="/article/edit/{{ .ID }}" style="color: #007bff; text-decoration: none; margin-right: 10px;">编辑</a>
-                {{ end }}
+            {{ $articleUserID := .UserID }}
+            {{ $currentUserID := 0 }}
+            {{ if $.user.ID }}{{ $currentUserID = $.user.ID }}{{ end }}
+            {{ if or (eq $.user.Username "admin") (eq $articleUserID $currentUserID) }}
+            <a href="/article/edit/{{ .ID }}">编辑</a>
+            <form action="/article/delete/{{ .ID }}" method="POST" onsubmit="return confirm('确定要删除这篇文章吗？');">
+                <button type="submit">删除</button>
+            </form>
             {{ end }}
         </div>
+        {{ end }}
     </div>
     {{ end }}
+
+    {{ if gt .totalPages 1 }}
+    <div class="pagination">
+        {{ if gt .page 1 }}
+        <a href="/article/list?page={{ sub .page 1 }}{{ if .keyword }}&keyword={{ .keyword }}{{ end }}">上一页</a>
+        {{ else }}
+        <span class="disabled">上一页</span>
+        {{ end }}
+
+        {{ $currentPage := .page }}
+        {{ $totalPages := .totalPages }}
+        {{ range $i := iterate $totalPages }}
+            {{ $pageNum := add $i 1 }}
+            {{ if eq $pageNum $currentPage }}
+            <span class="active">{{ $pageNum }}</span>
+            {{ else }}
+            <a href="/article/list?page={{ $pageNum }}{{ if $.keyword }}&keyword={{ $.keyword }}{{ end }}">{{ $pageNum }}</a>
+            {{ end }}
+        {{ end }}
+
+        {{ if lt .page .totalPages }}
+        <a href="/article/list?page={{ add .page 1 }}{{ if .keyword }}&keyword={{ .keyword }}{{ end }}">下一页</a>
+        {{ else }}
+        <span class="disabled">下一页</span>
+        {{ end }}
+    </div>
+    {{ end }}
+
     {{ else }}
-    <div class="no-article">暂无文章，快去发布吧！</div>
+    <div class="no-article">暂无文章，快去发布第一篇吧！</div>
     {{ end }}
 </div>
 </body>

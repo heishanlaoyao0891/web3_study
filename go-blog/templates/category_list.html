@@ -4,55 +4,42 @@
     <meta charset="UTF-8">
     <title>类别管理 - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .content { max-width: 800px; margin: 0 auto; }
-        .btn { padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; margin-bottom: 20px; }
-        .btn:hover { background-color: #0069d9; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-danger:hover { background-color: #c82333; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        .table th { background-color: #f8f9fa; font-weight: 600; }
-        .form-container { max-width: 600px; margin: 20px auto; }
-        .form-group { margin: 20px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .error { color: red; margin: 10px 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .content { max-width: 900px; margin: 0 auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-title { font-size: 24px; color: #1a1a2e; }
+        .btn { padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; text-decoration: none; display: inline-block; font-weight: 600; font-size: 14px; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .btn-sm { padding: 6px 14px; font-size: 13px; }
+        .btn-edit { background: #667eea; }
+        .btn-delete { background: #dc3545; }
+        .btn-delete:hover { box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 16px 20px; text-align: left; }
+        .table th { background: #f8f9fa; font-weight: 600; color: #555; border-bottom: 2px solid #e1e5eb; }
+        .table td { border-bottom: 1px solid #f0f2f5; color: #333; }
+        .table tbody tr:hover { background: #fafbfc; }
+        .table tbody tr:last-child td { border-bottom: none; }
+        .category-name { font-weight: 600; color: #1a1a2e; }
+        .category-desc { color: #666; }
+        .actions { display: flex; gap: 8px; }
+        .actions form { display: inline; }
+        .error { padding: 12px 16px; background: #f8d7da; color: #721c24; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
+        .empty-state { text-align: center; padding: 60px; color: #999; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>类别管理</h1>
+    <p>管理文章分类，组织内容结构</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -69,6 +56,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -81,30 +69,44 @@
     <div class="error">{{ .error }}</div>
     {{ end }}
     
-    <a href="/category/create" class="btn">添加类别</a>
+    <div class="page-header">
+        <h2 class="page-title">分类列表</h2>
+        <a href="/category/create" class="btn">添加分类</a>
+    </div>
     
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>名称</th>
-                <th>描述</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{ range .categories }}
-            <tr>
-                <td>{{ .ID }}</td>
-                <td>{{ .Name }}</td>
-                <td>{{ .Desc }}</td>
-                <td>
-                    <a href="/category/edit/{{ .ID }}" class="btn" style="padding: 4px 12px; font-size: 14px; margin-right: 5px;">编辑</a>
-                </td>
-            </tr>
-            {{ end }}
-        </tbody>
-    </table>
+    <div class="card">
+        {{ if .categories }}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>名称</th>
+                    <th>描述</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .categories }}
+                <tr>
+                    <td>{{ .ID }}</td>
+                    <td class="category-name">{{ .Name }}</td>
+                    <td class="category-desc">{{ if .Desc }}{{ .Desc }}{{ else }}-{{ end }}</td>
+                    <td>
+                        <div class="actions">
+                            <a href="/category/edit/{{ .ID }}" class="btn btn-sm btn-edit">编辑</a>
+                            <form action="/category/delete/{{ .ID }}" method="POST" onsubmit="return confirm('确定要删除此分类吗？');">
+                                <button type="submit" class="btn btn-sm btn-delete">删除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+        {{ else }}
+        <div class="empty-state">暂无分类，点击上方按钮添加第一个分类吧！</div>
+        {{ end }}
+    </div>
 </div>
 </body>
 </html>

@@ -43,109 +43,78 @@ func GetIndex(c *gin.Context) {
 
 // GetArticleList 获取文章列表
 func GetArticleList(c *gin.Context) {
-	var articles []model.Article
-	// 从上下文中获取用户信息
 	user := util.GetUserFromContext(c)
-	// 获取搜索关键字
 	keyword := c.Query("keyword")
+	pageStr := c.Query("page")
+	pageSize := 10
+
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	var total int64
+	var articles []model.Article
+
+	query := util.Db.Model(&model.Article{}).Preload("User").Preload("Category")
+
+	var userID uint
+	isAdmin := false
 
 	if user != nil {
-		// 检查用户是否是管理员  (user.(map[string]interface{})是类型断言，类似java的instanceof)
 		userMap, ok := user.(map[string]interface{})
-		if ok && userMap["Username"] == "admin" {
-			// 管理员可以看到所有文章
-			query := util.Db.Preload("User").Preload("Category")
-			// 如果有搜索关键字，添加搜索条件
-			if keyword != "" {
-				query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+		if ok {
+			if userMap["Username"] == "admin" {
+				isAdmin = true
 			}
-			result := query.Find(&articles)
-			if result.Error != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-				return
-			}
-		} else {
-			// 普通用户可以看到公开的文章和自己的私有文章
-			// 尝试获取用户ID，处理不同类型
-			var userID uint
-			var ok bool
-
-			// 检查ID的类型
 			idValue := userMap["ID"]
 			switch v := idValue.(type) {
 			case uint:
 				userID = v
-				ok = true
 			case float64:
 				userID = uint(v)
-				ok = true
 			case int:
 				userID = uint(v)
-				ok = true
-			default:
-				ok = false
-			}
-
-			if ok {
-				// 查询公开文章或自己的文章，并添加搜索条件
-				if keyword != "" {
-					// 带搜索条件
-					result := util.Db.Preload("User").Preload("Category").Where("(visibility = ? OR user_id = ?) AND (title LIKE ? OR content LIKE ?)", 1, userID, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
-					if result.Error != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-						return
-					}
-				} else {
-					// 不带搜索条件
-					result := util.Db.Preload("User").Preload("Category").Where("visibility = ? OR user_id = ?", 1, userID).Find(&articles)
-					if result.Error != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-						return
-					}
-				}
-			} else {
-				// 未获取到用户ID，只显示公开文章
-				if keyword != "" {
-					// 带搜索条件
-					result := util.Db.Preload("User").Preload("Category").Where("visibility = ? AND (title LIKE ? OR content LIKE ?)", 1, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
-					if result.Error != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-						return
-					}
-				} else {
-					// 不带搜索条件
-					result := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1).Find(&articles)
-					if result.Error != nil {
-						c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-						return
-					}
-				}
-			}
-		}
-	} else {
-		// 未登录用户只能看到公开的文章
-		if keyword != "" {
-			// 带搜索条件
-			result := util.Db.Preload("User").Preload("Category").Where("visibility = ? AND (title LIKE ? OR content LIKE ?)", 1, "%"+keyword+"%", "%"+keyword+"%").Find(&articles)
-			if result.Error != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-				return
-			}
-		} else {
-			// 不带搜索条件
-			result := util.Db.Preload("User").Preload("Category").Where("visibility = ?", 1).Find(&articles)
-			if result.Error != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
-				return
 			}
 		}
 	}
-	// 渲染模板并传递数据
+
+	if keyword != "" {
+		query = query.Where("title LIKE ? OR content LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+
+	if !isAdmin {
+		if userID > 0 {
+			query = query.Where("visibility = ? OR user_id = ?", 1, userID)
+		} else {
+			query = query.Where("visibility = ?", 1)
+		}
+	}
+
+	query.Count(&total)
+
+	offset := (page - 1) * pageSize
+	result := query.Order("created_at desc").Offset(offset).Limit(pageSize).Find(&articles)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取文章列表失败"})
+		return
+	}
+
+	totalPages := int(total) / pageSize
+	if int(total)%pageSize > 0 {
+		totalPages++
+	}
+
 	c.HTML(http.StatusOK, "article_list.html", gin.H{
-		"title":    "文章列表 - Go博客",
-		"articles": articles,
-		"user":     user,
-		"keyword":  keyword,
+		"title":      "文章列表 - Go博客",
+		"articles":   articles,
+		"user":       user,
+		"keyword":    keyword,
+		"page":       page,
+		"totalPages": totalPages,
+		"total":      total,
 	})
 }
 
@@ -224,10 +193,15 @@ func GetArticleDetail(c *gin.Context) {
 		}
 	}
 
+	// 获取文章评论
+	var comments []model.Comment
+	util.Db.Preload("User").Where("article_id = ? AND parent_id IS NULL", article.ID).Order("created_at desc").Find(&comments)
+
 	// 渲染模板
 	c.HTML(http.StatusOK, "article_detail.html", gin.H{
-		"article": article,
-		"user":    user,
+		"article":  article,
+		"user":     user,
+		"comments": comments,
 	})
 }
 
@@ -386,4 +360,51 @@ func PostArticleEdit(c *gin.Context) {
 
 	// 重定向到文章详情页面
 	c.Redirect(http.StatusFound, "/article/detail/"+id)
+}
+
+// PostArticleDelete 删除文章
+func PostArticleDelete(c *gin.Context) {
+	user := util.GetUserFromContext(c)
+
+	id := c.Param("id")
+	var article model.Article
+	result := util.Db.First(&article, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "文章不存在"})
+		return
+	}
+
+	userMap, ok := user.(map[string]interface{})
+	if !ok {
+		c.JSON(http.StatusForbidden, gin.H{"error": "无权限删除此文章"})
+		return
+	}
+
+	isAdmin := userMap["Username"] == "admin"
+	var userID uint
+	var idOk bool
+
+	idValue := userMap["ID"]
+	switch v := idValue.(type) {
+	case uint:
+		userID = v
+		idOk = true
+	case float64:
+		userID = uint(v)
+		idOk = true
+	case int:
+		userID = uint(v)
+		idOk = true
+	default:
+		idOk = false
+	}
+
+	if !isAdmin && (!idOk || userID != article.UserID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "无权限删除此文章"})
+		return
+	}
+
+	util.Db.Delete(&article)
+
+	c.Redirect(http.StatusFound, "/article/list")
 }

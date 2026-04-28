@@ -188,3 +188,34 @@ func PostCategoryEdit(c *gin.Context) {
 	// 重定向到类别列表页面
 	c.Redirect(http.StatusFound, "/category/list")
 }
+
+// PostCategoryDelete 删除分类
+func PostCategoryDelete(c *gin.Context) {
+	user := util.GetUserFromContext(c)
+
+	userMap, ok := user.(map[string]interface{})
+	if !ok || userMap["Username"] != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "权限不足"})
+		return
+	}
+
+	id := c.Param("id")
+
+	var category model.Category
+	result := util.Db.First(&category, id)
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "分类不存在"})
+		return
+	}
+
+	var articleCount int64
+	util.Db.Model(&model.Article{}).Where("category_id = ?", id).Count(&articleCount)
+	if articleCount > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "该分类下还有文章，无法删除"})
+		return
+	}
+
+	util.Db.Delete(&category)
+
+	c.Redirect(http.StatusFound, "/category/list")
+}

@@ -6,6 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func UintPtr(v uint) *uint {
+	return &v
+}
+
 // GetUserFromContext 从上下文中获取用户信息
 func GetUserFromContext(c *gin.Context) interface{} {
 	// 先尝试从Gin上下文中获取用户信息

@@ -89,6 +89,7 @@ func main() {
 		&model.User{},
 		&model.Category{},
 		&model.Article{},
+		&model.Comment{},
 	)
 	if err != nil {
 		panic("表创建失败：" + err.Error())

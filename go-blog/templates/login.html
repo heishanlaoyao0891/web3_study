@@ -4,106 +4,89 @@
     <meta charset="UTF-8">
     <title>登录 - Go博客</title>
     <style>
-        body { max-width: 400px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .form-group { margin: 20px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
-        .btn:hover { background-color: #0056b3; }
-        .error { color: red; margin: 10px 0; }
-        .disable-message { background-color: #f8d7da; color: #721c24; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center; }
-        .countdown { font-size: 18px; font-weight: bold; color: #dc3545; margin: 10px 0; }
-        a { text-decoration: none; color: #007bff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; }
+        .login-card { background: white; padding: 50px 40px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); width: 100%; max-width: 420px; }
+        .logo { text-align: center; margin-bottom: 35px; }
+        .logo h1 { font-size: 28px; color: #1a1a2e; margin-bottom: 8px; }
+        .logo p { color: #888; font-size: 14px; }
+        .form-group { margin-bottom: 22px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; font-size: 14px; }
+        .form-group input { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 15px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4); }
+        .error { padding: 12px 16px; background: #f8d7da; color: #721c24; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
+        .disable-message { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); color: white; padding: 18px; border-radius: 12px; margin-bottom: 20px; text-align: center; }
+        .countdown { font-size: 20px; font-weight: 700; margin-top: 10px; }
+        .footer { text-align: center; margin-top: 25px; }
+        .footer a { color: #667eea; text-decoration: none; font-weight: 500; }
+        .footer a:hover { text-decoration: underline; }
+        .back-home { position: absolute; top: 20px; left: 20px; }
+        .back-home a { color: white; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 8px; }
     </style>
     <script>
         function countdown() {
-            // 获取禁用结束时间（Unix时间戳）
             const endTimeStr = document.getElementById('end-time').value;
             if (!endTimeStr) return;
-            
-            // 转换为数字类型
             const endTimeUnix = parseInt(endTimeStr);
-            if (isNaN(endTimeUnix)) {
-                console.error('无效的结束时间戳:', endTimeStr);
-                return;
-            }
-            
-            // 转换为毫秒
+            if (isNaN(endTimeUnix)) return;
             const endTime = new Date(endTimeUnix * 1000);
             const now = new Date();
-            
-            // 调试信息
-            console.log('结束时间:', endTime);
-            console.log('当前时间:', now);
-            
             const diff = endTime - now;
-            console.log('时间差（毫秒）:', diff);
-            
             if (diff <= 0) {
-                // 时间到，刷新页面
                 window.location.reload();
                 return;
             }
-            
-            // 计算剩余时间
             const totalSeconds = Math.floor(diff / 1000);
             const days = Math.floor(totalSeconds / (24 * 60 * 60));
             const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
             const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
             const seconds = totalSeconds % 60;
-            
-            // 调试信息
-            console.log('计算结果:', days, '天', hours, '小时', minutes, '分钟', seconds, '秒');
-            
-            // 显示倒计时
-            const countdownElement = document.getElementById('countdown');
-            countdownElement.innerHTML = `剩余时间：${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
-            
-            // 每秒更新一次
+            document.getElementById('countdown').innerHTML = `${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
             setTimeout(countdown, 1000);
         }
-        
-        // 页面加载完成后开始倒计时
         window.onload = function() {
-            if (document.getElementById('end-time')) {
-                countdown();
-            }
+            if (document.getElementById('end-time')) countdown();
         };
     </script>
 </head>
 <body>
-<div class="header">
-    <h1>登录</h1>
+<div class="back-home">
+    <a href="/">← 返回首页</a>
 </div>
-<div class="content">
+<div class="login-card">
+    <div class="logo">
+        <h1>欢迎回来</h1>
+        <p>登录您的 Go 博客账户</p>
+    </div>
     {{ if .error }}
         {{ if .is_disabled }}
-            <div class="disable-message">
-                {{ .error }}
-                {{ if not .is_permanent }}
-                    <div class="countdown" id="countdown"></div>
-                    <input type="hidden" id="end-time" value="{{ .disable_until.Unix }}">
-                {{ end }}
-            </div>
+        <div class="disable-message">
+            {{ .error }}
+            {{ if not .is_permanent }}
+            <div class="countdown" id="countdown"></div>
+            <input type="hidden" id="end-time" value="{{ .disable_until.Unix }}">
+            {{ end }}
+        </div>
         {{ else }}
-            <div class="error">{{ .error }}</div>
+        <div class="error">{{ .error }}</div>
         {{ end }}
     {{ end }}
     <form action="/login" method="post">
         <div class="form-group">
             <label for="username">用户名</label>
-            <input type="text" id="username" name="username" required>
+            <input type="text" id="username" name="username" placeholder="请输入用户名" required>
         </div>
         <div class="form-group">
             <label for="password">密码</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" placeholder="请输入密码" required>
         </div>
         <div class="form-group">
             <button type="submit" class="btn">登录</button>
         </div>
     </form>
-    <div style="text-align: center; margin-top: 20px;">
+    <div class="footer">
         <a href="/register">没有账号？立即注册</a>
     </div>
 </div>

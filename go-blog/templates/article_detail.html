@@ -4,45 +4,53 @@
     <meta charset="UTF-8">
     <title>{{ .article.Title }} - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .article-title { font-size: 24px; margin: 20px 0; }
-        .article-meta { color: #999; margin: 10px 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .article-content { margin: 20px 0; line-height: 1.8; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1000px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .article-card { background: white; border-radius: 16px; padding: 40px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .article-title { font-size: 28px; color: #1a1a2e; margin-bottom: 15px; line-height: 1.4; }
+        .article-meta { color: #888; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #f0f2f5; display: flex; flex-wrap: wrap; gap: 15px; }
+        .article-meta span { background: #f5f7fa; padding: 6px 12px; border-radius: 20px; font-size: 14px; }
+        .article-content { font-size: 17px; line-height: 1.8; color: #333; white-space: pre-wrap; }
+        .article-actions { margin-top: 30px; padding-top: 20px; border-top: 1px solid #f0f2f5; display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .btn-edit { background: #667eea; color: white; }
+        .btn-edit:hover { background: #5a6fd6; }
+        .btn-delete { background: #dc3545; color: white; }
+        .btn-delete:hover { background: #c82333; }
+        .btn-back { background: #6c757d; color: white; }
+        .btn-back:hover { background: #5a6268; }
+        .comments-section { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .comments-title { font-size: 20px; color: #1a1a2e; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #667eea; }
+        .comment-form { margin-bottom: 30px; }
+        .comment-form textarea { width: 100%; padding: 15px; border: 2px solid #e1e5eb; border-radius: 12px; font-size: 15px; resize: vertical; min-height: 100px; transition: all 0.3s; font-family: inherit; }
+        .comment-form textarea:focus { outline: none; border-color: #667eea; }
+        .comment-form button { margin-top: 15px; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .comment-form button:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .comment-list { margin-top: 20px; }
+        .comment-item { padding: 20px; background: #f8f9fa; border-radius: 12px; margin-bottom: 15px; }
+        .comment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .comment-author { font-weight: 600; color: #333; }
+        .comment-time { font-size: 13px; color: #999; }
+        .comment-content { color: #555; line-height: 1.6; }
+        .comment-actions { margin-top: 10px; }
+        .comment-actions form { display: inline; }
+        .comment-actions button { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 13px; }
+        .comment-actions button:hover { text-decoration: underline; }
+        .no-comments { text-align: center; color: #999; padding: 40px; }
+        .login-hint { text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px; margin-bottom: 20px; }
+        .login-hint a { color: #667eea; font-weight: 500; }
     </style>
 </head>
 <body>
 <div class="header">
-    <h1>文章详情</h1>
+    <h1>{{ .article.Title }}</h1>
+    <p>分享知识，记录生活</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -59,6 +67,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -66,15 +75,80 @@
         {{ end }}
     </div>
 </div>
-<div class="article-title">
-    {{ .article.Title }}
+
+<div class="article-card">
+    <h1 class="article-title">{{ .article.Title }}</h1>
+    <div class="article-meta">
+        <span>作者：{{ .article.User.Nickname }}</span>
+        <span>分类：{{ .article.Category.Name }}</span>
+        <span>发布：{{ .article.CreatedAt.Format "2006-01-02 15:04" }}</span>
+        {{ if eq .article.Visibility 0 }}
+        <span style="background: #fff3cd; color: #856404;">私密文章</span>
+        {{ end }}
+    </div>
+    <div class="article-content">{{ .article.Content }}</div>
+    
+    {{ if .user }}
+    <div class="article-actions">
+        {{ $userID := 0 }}
+        {{ if .user.ID }}
+            {{ $userID = .user.ID }}
+        {{ end }}
+        {{ if or (eq .user.Username "admin") (eq .article.UserID .user.ID) }}
+        <a href="/article/edit/{{ .article.ID }}" class="btn btn-edit">编辑文章</a>
+        <form action="/article/delete/{{ .article.ID }}" method="POST" style="display: inline;" onsubmit="return confirm('确定要删除这篇文章吗？');">
+            <button type="submit" class="btn btn-delete">删除文章</button>
+        </form>
+        {{ end }}
+        <a href="/article/list" class="btn btn-back">返回列表</a>
+    </div>
+    {{ end }}
 </div>
-<div class="article-meta">
-    作者：{{ .article.User.Nickname }} | 分类：{{ .article.Category.Name }} | 发布时间：{{ .article.CreatedAt.Format "2006-01-02 15:04:05" }}
-</div>
-<div class="article-content">
-    <!-- 输出文章内容（支持换行） -->
-    {{ .article.Content | replace "\n" "<br/>" | safeHTML }}
+
+<div class="comments-section">
+    <h3 class="comments-title">评论区</h3>
+    
+    {{ if .user }}
+    <div class="comment-form">
+        <form method="POST" action="/comment/create">
+            <input type="hidden" name="article_id" value="{{ .article.ID }}">
+            <textarea name="content" placeholder="写下你的评论..." required></textarea>
+            <button type="submit">发表评论</button>
+        </form>
+    </div>
+    {{ else }}
+    <div class="login-hint">
+        <a href="/login">登录</a> 后参与评论
+    </div>
+    {{ end }}
+    
+    <div class="comment-list">
+        {{ if .comments }}
+            {{ range .comments }}
+            <div class="comment-item">
+                <div class="comment-header">
+                    <span class="comment-author">{{ .User.Nickname }}</span>
+                    <span class="comment-time">{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
+                </div>
+                <div class="comment-content">{{ .Content }}</div>
+                {{ if $.user }}
+                {{ $commentUserID := .UserID }}
+                {{ $currentUserID := 0 }}
+                {{ if $.user.ID }}{{ $currentUserID = $.user.ID }}{{ end }}
+                {{ if or (eq $.user.Username "admin") (eq $commentUserID $currentUserID) }}
+                <div class="comment-actions">
+                    <form action="/comment/delete/{{ .ID }}" method="POST" onsubmit="return confirm('确定要删除这条评论吗？');">
+                        <button type="submit">删除</button>
+                    </form>
+                </div>
+                {{ end }}
+                {{ end }}
+            </div>
+            {{ end }}
+        {{ else }}
+            <div class="no-comments">暂无评论，快来发表第一条评论吧！</div>
+        {{ end }}
+    </div>
 </div>
 </body>
 </html>

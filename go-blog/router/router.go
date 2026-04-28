@@ -15,6 +15,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func add(a, b int) int {
+	return a + b
+}
+
+func sub(a, b int) int {
+	return a - b
+}
+
+func iterate(count int) []int {
+	var items []int
+	for i := 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
 // InitRouter 初始化路由（对应Java的@RequestMapping）
 func InitRouter() *gin.Engine {
 	r := gin.Default()
@@ -40,6 +56,11 @@ func InitRouter() *gin.Engine {
 		"now": func() time.Time {
 			return time.Now()
 		},
+		// 数学运算
+		"add": add,
+		"sub": sub,
+		// 迭代器
+		"iterate": iterate,
 	})
 
 	// 加载模板文件
@@ -54,10 +75,18 @@ func InitRouter() *gin.Engine {
 		articleGroup.GET("/list", service.GetArticleList)         // 文章列表（不需要认证）
 		articleGroup.GET("/detail/:id", service.GetArticleDetail) // 文章详情（不需要认证）
 		// 发布和编辑文章需要认证
-		articleGroup.GET("/create", requireAuthMiddleware(), service.GetArticleCreate)   // 发布文章页面
-		articleGroup.POST("/create", requireAuthMiddleware(), service.PostArticleCreate) // 处理发布文章请求
-		articleGroup.GET("/edit/:id", requireAuthMiddleware(), service.GetArticleEdit)   // 编辑文章页面
-		articleGroup.POST("/edit/:id", requireAuthMiddleware(), service.PostArticleEdit) // 处理编辑文章请求
+		articleGroup.GET("/create", requireAuthMiddleware(), service.GetArticleCreate)     // 发布文章页面
+		articleGroup.POST("/create", requireAuthMiddleware(), service.PostArticleCreate)   // 处理发布文章请求
+		articleGroup.GET("/edit/:id", requireAuthMiddleware(), service.GetArticleEdit)     // 编辑文章页面
+		articleGroup.POST("/edit/:id", requireAuthMiddleware(), service.PostArticleEdit)   // 处理编辑文章请求
+		articleGroup.POST("/delete/:id", requireAuthMiddleware(), service.PostArticleDelete) // 删除文章
+	}
+
+	// 评论相关路由
+	commentGroup := r.Group("/comment")
+	{
+		commentGroup.POST("/create", requireAuthMiddleware(), service.PostCommentCreate)   // 发布评论
+		commentGroup.POST("/delete/:id", requireAuthMiddleware(), service.PostCommentDelete) // 删除评论
 	}
 
 	// 用户相关路由（需要认证）
@@ -68,14 +97,19 @@ func InitRouter() *gin.Engine {
 		userGroup.POST("/restore", service.PostRestoreUser) // 恢复用户（管理员）
 	}
 
+	// 用户资料路由
+	r.GET("/profile", requireAuthMiddleware(), service.GetProfile)
+	r.POST("/profile", requireAuthMiddleware(), service.PostProfile)
+
 	// 类别相关路由（需要认证）
 	categoryGroup := r.Group("/category", requireAuthMiddleware())
 	{
-		categoryGroup.GET("/list", service.GetCategoryList)       // 类别列表（管理员）
-		categoryGroup.GET("/create", service.GetCategoryCreate)   // 添加类别页面（管理员）
-		categoryGroup.POST("/create", service.PostCategoryCreate) // 处理添加类别请求（管理员）
-		categoryGroup.GET("/edit/:id", service.GetCategoryEdit)   // 编辑类别页面（管理员）
-		categoryGroup.POST("/edit/:id", service.PostCategoryEdit) // 处理编辑类别请求（管理员）
+		categoryGroup.GET("/list", service.GetCategoryList)           // 类别列表（管理员）
+		categoryGroup.GET("/create", service.GetCategoryCreate)       // 添加类别页面（管理员）
+		categoryGroup.POST("/create", service.PostCategoryCreate)     // 处理添加类别请求（管理员）
+		categoryGroup.GET("/edit/:id", service.GetCategoryEdit)       // 编辑类别页面（管理员）
+		categoryGroup.POST("/edit/:id", service.PostCategoryEdit)     // 处理编辑类别请求（管理员）
+		categoryGroup.POST("/delete/:id", service.PostCategoryDelete) // 删除分类（管理员）
 	}
 
 	// 登录注册路由

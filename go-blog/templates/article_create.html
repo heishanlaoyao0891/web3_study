@@ -4,48 +4,35 @@
     <meta charset="UTF-8">
     <title>发布文章 - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .form-group { margin: 20px 0; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-group textarea { height: 300px; resize: vertical; }
-        .btn { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .btn:hover { background-color: #0056b3; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .form-card { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; color: #333; font-weight: 600; font-size: 15px; }
+        .form-group input[type="text"] { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { width: 100%; padding: 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; min-height: 350px; resize: vertical; font-family: inherit; line-height: 1.6; transition: all 0.3s; }
+        .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .form-group select { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; background: white; cursor: pointer; transition: all 0.3s; }
+        .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn { padding: 14px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #6c757d; margin-left: 10px; }
+        .form-actions { display: flex; gap: 15px; margin-top: 30px; }
+        @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>发布文章</h1>
+    <p>分享你的想法和知识</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -62,6 +49,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -69,33 +57,36 @@
         {{ end }}
     </div>
 </div>
-<div class="content">
+<div class="form-card">
     <form action="/article/create" method="post">
         <div class="form-group">
-            <label for="title">标题</label>
-            <input type="text" id="title" name="title" required>
+            <label for="title">文章标题</label>
+            <input type="text" id="title" name="title" placeholder="请输入文章标题" required>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="category">文章分类</label>
+                <select id="category" name="category_id" required>
+                    {{ range .categories }}
+                    <option value="{{ .ID }}">{{ .Name }}</option>
+                    {{ end }}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="visibility">可见性</label>
+                <select id="visibility" name="visibility" required>
+                    <option value="1">公开 - 所有人可见</option>
+                    <option value="0">私密 - 仅自己可见</option>
+                </select>
+            </div>
         </div>
         <div class="form-group">
-            <label for="category">分类</label>
-            <select id="category" name="category_id" required>
-                {{ range .categories }}
-                <option value="{{ .ID }}">{{ .Name }}</option>
-                {{ end }}
-            </select>
+            <label for="content">文章内容</label>
+            <textarea id="content" name="content" placeholder="在这里写下你的文章内容..." required></textarea>
         </div>
-        <div class="form-group">
-            <label for="content">内容</label>
-            <textarea id="content" name="content" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="visibility">可见性</label>
-            <select id="visibility" name="visibility" required>
-                <option value="1">公开</option>
-                <option value="0">仅自己可见</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <button type="submit" class="btn">发布</button>
+        <div class="form-actions">
+            <button type="submit" class="btn">发布文章</button>
+            <a href="/article/list" class="btn btn-secondary" style="text-decoration: none;">取消</a>
         </div>
     </form>
 </div>

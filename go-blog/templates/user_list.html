@@ -4,51 +4,39 @@
     <meta charset="UTF-8">
     <title>用户管理 - Go博客</title>
     <style>
-        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial; }
-        .header { text-align: center; padding: 20px; border-bottom: 1px solid #eee; }
-        .nav { 
-            margin: 20px 0; 
-            background-color: #f8f9fa; 
-            padding: 15px 20px; 
-            border-radius: 5px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-        .nav-left { display: flex; align-items: center; }
-        .nav-right { display: flex; align-items: center; }
-        .nav a { 
-            margin-right: 25px; 
-            text-decoration: none; 
-            color: #333; 
-            font-size: 16px; 
-            font-weight: 500; 
-            transition: all 0.3s ease; 
-        }
-        .nav a:hover { 
-            color: #007bff; 
-            transform: translateY(-1px); 
-        }
-        .nav span { 
-            margin-right: 25px; 
-            color: #666; 
-            font-size: 14px; 
-        }
-        .user-item { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
-        .user-info { display: flex; justify-content: space-between; align-items: center; }
-        .btn { padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #218838; }
-        .disable-form { display: inline; }
-        .disable-select { padding: 3px 5px; border: 1px solid #ddd; border-radius: 3px; margin-right: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .user-card { background: white; border-radius: 12px; padding: 20px 25px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; transition: all 0.3s; }
+        .user-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .user-info h3 { font-size: 18px; color: #1a1a2e; margin-bottom: 8px; }
+        .user-info p { color: #666; font-size: 14px; margin-bottom: 4px; }
+        .user-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .badge-active { background: #d4edda; color: #155724; }
+        .badge-disabled { background: #f8d7da; color: #721c24; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-admin { background: #cce5ff; color: #004085; }
+        .user-actions { display: flex; gap: 10px; align-items: center; }
+        .disable-form { display: flex; gap: 8px; align-items: center; }
+        .disable-select { padding: 8px 12px; border: 2px solid #e1e5eb; border-radius: 8px; font-size: 14px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .empty-state { text-align: center; padding: 60px; color: #999; background: white; border-radius: 12px; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>用户管理</h1>
+    <p>管理平台用户，维护社区秩序</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -65,6 +53,7 @@
     <div class="nav-right">
         {{ if .user }}
             <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
             <a href="/register">注册</a>
@@ -75,26 +64,30 @@
 <div class="content">
     {{ if .users }}
     {{ range .users }}
-    <div class="user-item">
+    <div class="user-card">
         <div class="user-info">
-            <div>
-                <strong>用户名：{{ .Username }}</strong> | 昵称：{{ .Nickname }} | 注册时间：{{ .CreatedAt.Format "2006-01-02 15:04:05" }}
+            <h3>{{ .Username }} {{ if eq .Username "admin" }}<span class="badge badge-admin">管理员</span>{{ end }}</h3>
+            <p>昵称：{{ .Nickname }}</p>
+            <p>注册时间：{{ .CreatedAt.Format "2006-01-02 15:04" }}</p>
+            <div class="user-meta">
                 {{ if eq .Status 0 }}
-                | 状态：<span style="color: red;">已禁用</span>
-                {{ if .DisableUntil }}
-                {{ if .DisableUntil.After (now) }}
-                | 禁用至：{{ .DisableUntil.Format "2006-01-02 15:04:05" }}
+                    <span class="badge badge-disabled">已禁用</span>
+                    {{ if .DisableUntil }}
+                        {{ if .DisableUntil.After (now) }}
+                        <span class="badge badge-pending">禁用至 {{ .DisableUntil.Format "2006-01-02 15:04" }}</span>
+                        {{ else }}
+                        <span class="badge badge-pending">待恢复</span>
+                        {{ end }}
+                    {{ else }}
+                    <span class="badge badge-disabled">永久禁用</span>
+                    {{ end }}
                 {{ else }}
-                | 状态：<span style="color: orange;">待恢复</span>
-                {{ end }}
-                {{ else }}
-                | 永久禁用
-                {{ end }}
-                {{ else }}
-                | 状态：<span style="color: green;">正常</span>
+                <span class="badge badge-active">正常</span>
                 {{ end }}
             </div>
-            {{ if ne .Username "admin" }}
+        </div>
+        {{ if ne .Username "admin" }}
+        <div class="user-actions">
             {{ if eq .Status 1 }}
             <form action="/user/disable" method="post" class="disable-form">
                 <input type="hidden" name="id" value="{{ .ID }}">
@@ -112,17 +105,17 @@
                 <button type="submit" class="btn btn-danger">禁用</button>
             </form>
             {{ else }}
-            <form action="/user/restore" method="post" style="display: inline;">
+            <form action="/user/restore" method="post">
                 <input type="hidden" name="id" value="{{ .ID }}">
                 <button type="submit" class="btn btn-success">恢复</button>
             </form>
             {{ end }}
-            {{ end }}
         </div>
+        {{ end }}
     </div>
     {{ end }}
     {{ else }}
-    <div class="no-user">暂无用户</div>
+    <div class="empty-state">暂无用户数据</div>
     {{ end }}
 </div>
 </body>
