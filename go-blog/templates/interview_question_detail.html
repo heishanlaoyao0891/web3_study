@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }} - Web3面试题</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 900px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
+        .question-detail { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .question-title { font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; }
+        .question-meta { font-size: 14px; color: #888; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .question-meta span { margin-right: 20px; }
+        .difficulty-1 { color: #28a745; }
+        .difficulty-2 { color: #ffc107; }
+        .difficulty-3 { color: #dc3545; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-bottom: 15px; padding-left: 15px; border-left: 4px solid #667eea; }
+        .section-content { color: #333; line-height: 1.8; white-space: pre-wrap; }
+        .answer-box { background: #f8f9fa; padding: 25px; border-radius: 12px; }
+        .footer { text-align: center; padding: 40px 0; color: #888; }
+        .back-btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">首页</a>
+    <a href="/interview">面试题库</a>
+    <a href="/article/list">技术文章</a>
+</div>
+
+<div class="question-detail">
+    <div class="question-title">{{ .question.Title }}</div>
+    <div class="question-meta">
+        <span class="difficulty-{{ .question.Difficulty }}">{{ if eq .question.Difficulty 1 }}简单{{ else if eq .question.Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
+        <span>分类: {{ .question.Category }}</span>
+        {{ if .question.Company }}<span>来源: {{ .question.Company }}</span>{{ end }}
+        <span>浏览: {{ .question.ViewCount }}</span>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">问题描述</div>
+        <div class="section-content">{{ .question.Content }}</div>
+    </div>
+    
+    {{ if .question.Answer }}
+    <div class="section">
+        <div class="section-title">参考答案</div>
+        <div class="section-content answer-box">{{ .question.Answer }}</div>
+    </div>
+    {{ end }}
+    
+    <a href="/interview" class="back-btn">返回题库</a>
+</div>
+
+<div class="footer">
+    <p>© 2026 Web3技术社区</p>
+</div>
+</body>
+</html>

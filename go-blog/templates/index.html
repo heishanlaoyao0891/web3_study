@@ -83,16 +83,20 @@
 <div class="toast" id="toast"></div>
 
 <div class="header">
-    <h1>{{ .title }}</h1>
-    <p>分享知识，记录生活，探索技术的无限可能</p>
+    <h1>Web3技术社区</h1>
+    <p>Solidity智能合约 | DeFi协议开发 | NFT铸造交易 | 区块链安全</p>
 </div>
 
 <div class="nav">
     <div class="nav-left">
         <a href="/">首页</a>
-        <a href="/article/list">文章</a>
-        <a href="/qa/list">问答</a>
-        <a href="/course/list">教程</a>
+        <a href="/article/list">技术文章</a>
+        <a href="/interview">面试题库</a>
+        <a href="/qa/list">问答社区</a>
+        <a href="/learning-paths">学习路径</a>
+        <a href="/snippets">代码片段</a>
+        <a href="/templates">合约模板</a>
+        <a href="/resources">资源导航</a>
         {{ if .user }}
             {{ if eq .user.Username "admin" }}
             <a href="/user/list">用户管理</a>
@@ -117,28 +121,28 @@
 </div>
 
 <div class="intro-section">
-    <h2>关于本博客</h2>
+    <h2>Web3开发者社区</h2>
     <ul>
-        <li>基于 Go 语言、Gin 框架和 GORM 开发的现代化博客系统</li>
-        <li>支持用户注册、登录、等级系统和每日打卡</li>
-        <li>支持文章发布、编辑、删除、点赞和收藏功能</li>
-        <li>支持问答社区，提问、回答、采纳最佳答案</li>
-        <li>支持教程系统，章节学习、进度记录</li>
-        <li>JWT 认证 + Redis 会话管理</li>
+        <li>Solidity智能合约开发教程与最佳实践</li>
+        <li>DeFi协议原理分析：Uniswap、Aave、Compound等</li>
+        <li>NFT开发实战：ERC-721、ERC-1155、版税机制</li>
+        <li>智能合约安全审计与漏洞分析</li>
+        <li>Layer2扩容方案：Optimism、Arbitrum、zkSync</li>
+        <li>Web3面试题库与求职指南</li>
     </ul>
 </div>
 
 <div class="stats-section">
     <div class="stat-card">
-        <h3>文章总数</h3>
+        <h3>技术文章</h3>
         <p>{{ .stats.articleCount }}</p>
     </div>
     <div class="stat-card">
-        <h3>分类数量</h3>
+        <h3>知识分类</h3>
         <p>{{ .stats.categoryCount }}</p>
     </div>
     <div class="stat-card">
-        <h3>用户数量</h3>
+        <h3>开发者</h3>
         <p>{{ .stats.userCount }}</p>
     </div>
 </div>
@@ -216,28 +220,30 @@
         <div class="hot-tags">
             <h3>热门标签</h3>
             <div class="tags-list" id="hotTags">
-                <a href="/article/list?keyword=Java" class="tag-item">Java</a>
-                <a href="/article/list?keyword=Go" class="tag-item">Go</a>
-                <a href="/article/list?keyword=Python" class="tag-item">Python</a>
-                <a href="/article/list?keyword=前端" class="tag-item">前端</a>
-                <a href="/article/list?keyword=后端" class="tag-item">后端</a>
-                <a href="/article/list?keyword=数据库" class="tag-item">数据库</a>
-                <a href="/article/list?keyword=AI" class="tag-item">AI</a>
+                <a href="/article/list?keyword=Solidity" class="tag-item">Solidity</a>
+                <a href="/article/list?keyword=DeFi" class="tag-item">DeFi</a>
+                <a href="/article/list?keyword=NFT" class="tag-item">NFT</a>
+                <a href="/article/list?keyword=Layer2" class="tag-item">Layer2</a>
+                <a href="/article/list?keyword=智能合约" class="tag-item">智能合约</a>
+                <a href="/article/list?keyword=安全审计" class="tag-item">安全审计</a>
+                <a href="/article/list?keyword=Uniswap" class="tag-item">Uniswap</a>
             </div>
         </div>
         
         <div class="quick-links">
             <h3>快捷入口</h3>
-            <a href="/article/create">✍️ 发布文章</a>
-            <a href="/qa/create">❓ 提出问题</a>
-            <a href="/qa/list">💬 查看问答</a>
-            <a href="/course/list">📚 学习教程</a>
+            <a href="/learning-paths">🎯 学习路径</a>
+            <a href="/interview">📝 面试题库</a>
+            <a href="/snippets">💻 代码片段</a>
+            <a href="/templates">📄 合约模板</a>
+            <a href="/resources">🔗 资源导航</a>
         </div>
     </div>
 </div>
 
 <div class="footer">
-    <p>© 2026 Go 博客系统 | 基于 <a href="#">Go + Gin + GORM</a> 开发</p>
+    <p>© 2026 Web3技术社区 | 基于 Go + Gin + GORM 开发</p>
+    <p style="margin-top: 10px;">专注区块链开发 | 智能合约安全 | DeFi协议研究</p>
 </div>
 
 <script>

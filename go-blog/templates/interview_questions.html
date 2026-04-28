@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }} - Web3技术社区</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
+        .nav a:hover { color: #667eea; }
+        .page-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; margin-bottom: 30px; }
+        .page-header h1 { font-size: 32px; margin-bottom: 10px; }
+        .page-header p { opacity: 0.9; }
+        .filter-bar { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .filter-bar a { padding: 8px 20px; margin-right: 10px; background: #f5f7fa; border-radius: 20px; text-decoration: none; color: #333; }
+        .filter-bar a.active { background: #667eea; color: white; }
+        .question-list { }
+        .question-card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .question-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .question-title { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
+        .question-title a { text-decoration: none; color: inherit; }
+        .question-title a:hover { color: #667eea; }
+        .question-meta { font-size: 13px; color: #888; margin-bottom: 10px; }
+        .question-meta span { margin-right: 15px; }
+        .difficulty-1 { color: #28a745; }
+        .difficulty-2 { color: #ffc107; }
+        .difficulty-3 { color: #dc3545; }
+        .question-content { color: #555; line-height: 1.6; }
+        .footer { text-align: center; padding: 40px 0; color: #888; font-size: 14px; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">首页</a>
+    <a href="/article/list">技术文章</a>
+    <a href="/interview">面试题库</a>
+    <a href="/qa/list">问答社区</a>
+    <a href="/learning-paths">学习路径</a>
+    <a href="/snippets">代码片段</a>
+    <a href="/templates">合约模板</a>
+</div>
+
+<div class="page-header">
+    <h1>Web3面试题库</h1>
+    <p>覆盖智能合约、DeFi、NFT、安全审计等领域的面试题</p>
+</div>
+
+<div class="filter-bar">
+    <strong>分类：</strong>
+    <a href="/interview" {{ if not .currentCat }}class="active"{{ end }}>全部</a>
+    {{ range .categories }}
+    <a href="/interview?category={{ . }}" {{ if eq . $.currentCat }}class="active"{{ end }}>{{ . }}</a>
+    {{ end }}
+</div>
+
+<div class="question-list">
+    {{ if .questions }}
+    {{ range .questions }}
+    <div class="question-card">
+        <div class="question-title">
+            <a href="/interview/{{ .ID }}">{{ .Title }}</a>
+        </div>
+        <div class="question-meta">
+            <span class="difficulty-{{ .Difficulty }}">{{ if eq .Difficulty 1 }}简单{{ else if eq .Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
+            <span>分类: {{ .Category }}</span>
+            {{ if .Company }}<span>公司: {{ .Company }}</span>{{ end }}
+            <span>浏览: {{ .ViewCount }}</span>
+        </div>
+        <div class="question-content">{{ .Content | slice 0 100 }}...</div>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div style="text-align: center; padding: 60px; color: #888;">暂无面试题</div>
+    {{ end }}
+</div>
+
+<div class="footer">
+    <p>© 2026 Web3技术社区</p>
+</div>
+</body>
+</html>

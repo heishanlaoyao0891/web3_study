@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }} - Web3技术社区</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
+        .page-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; margin-bottom: 30px; }
+        .page-header h1 { font-size: 32px; margin-bottom: 10px; }
+        .filter-bar { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .filter-bar a { padding: 8px 20px; margin-right: 10px; background: #f5f7fa; border-radius: 20px; text-decoration: none; color: #333; }
+        .filter-bar a.active { background: #667eea; color: white; }
+        .snippet-list { }
+        .snippet-card { background: white; padding: 25px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .snippet-title { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 10px; }
+        .snippet-desc { color: #666; margin-bottom: 15px; }
+        .snippet-meta { font-size: 13px; color: #888; margin-bottom: 15px; }
+        .snippet-meta span { margin-right: 15px; }
+        pre { background: #1a1a2e; color: #e6e6e6; padding: 20px; border-radius: 12px; overflow-x: auto; font-size: 14px; line-height: 1.5; }
+        code { font-family: 'Monaco', 'Menlo', monospace; }
+        .footer { text-align: center; padding: 40px 0; color: #888; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">首页</a>
+    <a href="/article/list">技术文章</a>
+    <a href="/snippets">代码片段</a>
+    <a href="/templates">合约模板</a>
+</div>
+
+<div class="page-header">
+    <h1>Solidity代码片段</h1>
+    <p>常用的智能合约代码片段，可直接复制使用</p>
+</div>
+
+<div class="filter-bar">
+    <strong>分类：</strong>
+    <a href="/snippets" {{ if not .current }}class="active"{{ end }}>全部</a>
+    {{ range .categories }}
+    <a href="/snippets?category={{ . }}" {{ if eq . $.current }}class="active"{{ end }}>{{ . }}</a>
+    {{ end }}
+</div>
+
+<div class="snippet-list">
+    {{ if .snippets }}
+    {{ range .snippets }}
+    <div class="snippet-card">
+        <div class="snippet-title">{{ .Title }}</div>
+        <div class="snippet-desc">{{ .Description }}</div>
+        <div class="snippet-meta">
+            <span>分类: {{ .Category }}</span>
+            <span>语言: {{ .Language }}</span>
+            <span>浏览: {{ .ViewCount }}</span>
+        </div>
+        <pre><code>{{ .Code }}</code></pre>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div style="text-align: center; padding: 60px; color: #888;">暂无代码片段</div>
+    {{ end }}
+</div>
+
+<div class="footer">
+    <p>© 2026 Web3技术社区</p>
+</div>
+</body>
+</html>

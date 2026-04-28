@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .title }} - Web3技术社区</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
+        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
+        .page-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; margin-bottom: 30px; }
+        .page-header h1 { font-size: 32px; margin-bottom: 10px; }
+        .path-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
+        .path-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .path-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .path-title { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-bottom: 12px; }
+        .path-desc { color: #666; line-height: 1.6; margin-bottom: 15px; }
+        .path-meta { display: flex; gap: 15px; margin-bottom: 20px; }
+        .path-meta span { padding: 4px 12px; background: #f5f7fa; border-radius: 15px; font-size: 13px; color: #666; }
+        .difficulty-1 { border-left: 4px solid #28a745; }
+        .difficulty-2 { border-left: 4px solid #ffc107; }
+        .difficulty-3 { border-left: 4px solid #dc3545; }
+        .path-btn { display: inline-block; padding: 10px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 20px; font-weight: 600; }
+        .footer { text-align: center; padding: 40px 0; color: #888; }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <a href="/">首页</a>
+    <a href="/article/list">技术文章</a>
+    <a href="/interview">面试题库</a>
+    <a href="/learning-paths">学习路径</a>
+    <a href="/snippets">代码片段</a>
+</div>
+
+<div class="page-header">
+    <h1>Web3学习路径</h1>
+    <p>系统化的学习路线，从入门到精通</p>
+</div>
+
+<div class="path-grid">
+    {{ if .paths }}
+    {{ range .paths }}
+    <div class="path-card difficulty-{{ .Difficulty }}">
+        <div class="path-title">{{ .Title }}</div>
+        <div class="path-desc">{{ .Description }}</div>
+        <div class="path-meta">
+            <span>{{ if eq .Difficulty 1 }}入门级{{ else if eq .Difficulty 2 }}中级{{ else }}高级{{ end }}</span>
+            <span>{{ .Duration }}</span>
+            <span>{{ len .Chapters }} 章节</span>
+        </div>
+        <a href="/learning-paths/{{ .ID }}" class="path-btn">开始学习</a>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div style="text-align: center; padding: 60px; color: #888; grid-column: 1/-1;">暂无学习路径</div>
+    {{ end }}
+</div>
+
+<div class="footer">
+    <p>© 2026 Web3技术社区</p>
+</div>
+</body>
+</html>
