@@ -121,7 +121,10 @@ func GetInterviewQuestions(c *gin.Context) {
 		query = query.Where("difficulty = ?", difficulty)
 	}
 
-	query.Order("id desc").Find(&questions)
+	result := query.Order("id desc").Find(&questions)
+	
+	// 调试日志
+	println("GetInterviewQuestions: found", len(questions), "questions, error:", result.Error)
 
 	var categories []string
 	util.Db.Model(&model.InterviewQuestion{}).Distinct("category").Pluck("category", &categories)
