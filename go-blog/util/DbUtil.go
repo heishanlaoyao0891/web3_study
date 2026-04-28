@@ -61,7 +61,8 @@ func newMySQLDB(fileName string) (*gorm.DB, error) {
 	loadEnv(fileName)
 	dsn := os.Getenv("MYSQL_DSN")
 	if dsn == "" {
-		dsn = "root:password@tcp(localhost:3306)/testdb?charset=utf8mb4&parseTime=True&loc=Local"
+		// 默认使用生产环境数据库
+		dsn = "root:Woshizhu?@tcp(124.223.6.26:3306)/go_blog?charset=utf8mb4&parseTime=True&loc=Local"
 	}
 
 	return gorm.Open(mysql.Open(dsn), &gorm.Config{
