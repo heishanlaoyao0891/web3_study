@@ -18,48 +18,42 @@ jobs:
             # 定义常量
             PROJECT_DIR="/root/gin-web/test"
             BIN_NAME="gin-web"
-            LOG_FILE="app.log"
-            REPO_URL="git@github.com:heishanlaoyao0891/web3_study.git"  # GitHub仓库地址
+            LOG_DIR="/root/gin-web/logs"
+            LOG_FILE="$LOG_DIR/app.log"
+            REPO_URL="git@github.com:heishanlaoyao0891/web3_study.git"
 
-            echo "开始部署：清理旧项目文件"
-            # 清理旧项目文件
+            echo "开始部署..."
+            
+            # 创建日志目录
+            mkdir -p $LOG_DIR
+
+            echo "清理旧项目文件"
             rm -rf $PROJECT_DIR
             mkdir -p $PROJECT_DIR
 
             echo "克隆项目代码"
-            # 克隆项目代码
             if ! git clone $REPO_URL $PROJECT_DIR; then
               echo "克隆失败：无法访问GitHub仓库"
               exit 1
             fi
             
-            # 检查目录结构
             echo "检查目录结构..."
             ls -la $PROJECT_DIR
             
             # 进入go-blog目录
             cd $PROJECT_DIR/go-blog
             
-            # 再次检查当前目录
             echo "当前目录：$(pwd)"
             ls -la
 
-            echo "设置 Go 环境"
-            # 确保Go环境已安装（如果服务器没有Go，需要先安装）
-            if ! command -v go &> /dev/null; then
-              echo "安装 Go..."
-              wget https://dl.google.com/go/go1.22.0.linux-amd64.tar.gz
-              tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
-              export PATH=$PATH:/usr/local/go/bin
-            fi
+            echo "检查 Go 环境..."
+            go version
 
             echo "下载依赖"
-            # 下载依赖
             go mod tidy
 
             echo "编译项目"
-            # 编译项目
-            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $BIN_NAME main.go
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $BIN_NAME .
 
             # 验证编译产物是否存在
             if [ ! -f "./$BIN_NAME" ]; then
@@ -68,26 +62,22 @@ jobs:
             fi
 
             echo "停止旧服务..."
-            # 安全停止旧进程（忽略无进程的情况）
             ps -ef | grep "./$BIN_NAME" | grep -v grep | awk '{print $2}' | xargs kill -9 > /dev/null 2>&1 || true
             sleep 1
 
             echo "启动新服务..."
-            # 后台启动，追加日志（用 >> 避免覆盖历史日志）
             nohup ./$BIN_NAME >> $LOG_FILE 2>&1 &
             
-            # 显示环境变量，便于调试
-            echo "环境变量："
-            echo "REDIS_ADDR: $(echo $REDIS_ADDR)"
-            echo "REDIS_PASSWORD: $(echo $REDIS_PASSWORD)"
-            echo "REDIS_DB: $(echo $REDIS_DB)"
             sleep 2
 
             # 验证服务状态
             if ps -ef | grep "./$BIN_NAME" | grep -v grep > /dev/null; then
               echo "✅ 部署完成！服务已启动"
               echo "📄 最新日志："
-              tail -n 10 $LOG_FILE
+              tail -n 20 $LOG_FILE
+              echo ""
+              echo "📁 日志目录：$LOG_DIR"
+              echo "📄 日志文件：$LOG_FILE"
             else
               echo "❌ 部署失败！服务未启动"
               echo "📄 错误日志："
