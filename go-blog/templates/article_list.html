@@ -100,7 +100,13 @@
         </h2>
         <div class="article-meta">
             <span>{{ .User.Nickname }}</span>
-            <span>{{ .Category.Name }}</span>
+            <span>
+                {{ if .Categories }}
+                    {{ range $index, $cat := .Categories }}{{ if $index }}, {{ end }}{{ $cat.Name }}{{ end }}
+                {{ else }}
+                    {{ .Category.Name }}
+                {{ end }}
+            </span>
             <span>{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
         </div>
         <div class="article-excerpt">
