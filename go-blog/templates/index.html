@@ -17,12 +17,32 @@
         .nav a:hover { color: #667eea; }
         .nav a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #667eea; transition: width 0.3s; }
         .nav a:hover::after { width: 100%; }
-        .nav span { color: #666; font-size: 14px; margin-right: 20px; }
+        .nav .user-info { display: flex; align-items: center; gap: 15px; }
+        .nav .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+        .nav .user-level { background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%); color: #333; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
         .intro-section { background: white; padding: 40px; border-radius: 20px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .intro-section h2 { color: #1a1a2e; margin-bottom: 20px; font-size: 24px; }
         .intro-section ul { list-style: none; }
         .intro-section li { color: #555; line-height: 2; padding-left: 25px; position: relative; }
         .intro-section li::before { content: '✓'; position: absolute; left: 0; color: #667eea; font-weight: bold; }
+        .main-content { display: grid; grid-template-columns: 1fr 320px; gap: 30px; }
+        .left-content { }
+        .right-sidebar { }
+        .user-card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .user-card-header { text-align: center; margin-bottom: 20px; }
+        .user-card-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: 600; margin: 0 auto 15px; }
+        .user-card-name { font-size: 18px; font-weight: 600; color: #1a1a2e; }
+        .user-card-level { display: inline-block; background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%); color: #333; padding: 4px 12px; border-radius: 15px; font-size: 13px; font-weight: 600; margin-top: 8px; }
+        .user-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-bottom: 20px; }
+        .user-stat { padding: 10px; background: #f5f7fa; border-radius: 10px; }
+        .user-stat-value { font-size: 20px; font-weight: 700; color: #667eea; }
+        .user-stat-label { font-size: 12px; color: #888; margin-top: 4px; }
+        .checkin-section { text-align: center; }
+        .checkin-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .checkin-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .checkin-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .checkin-info { margin-top: 15px; font-size: 13px; color: #888; }
+        .checkin-days { color: #667eea; font-weight: 600; }
         .stats-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
         .stat-card { background: white; padding: 30px; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
@@ -37,9 +57,22 @@
         .article-meta { color: #888; font-size: 14px; margin-bottom: 12px; display: flex; gap: 15px; flex-wrap: wrap; }
         .article-meta span { background: #f5f7fa; padding: 4px 12px; border-radius: 15px; }
         .article-excerpt { color: #555; line-height: 1.7; }
+        .article-stats { display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f2f5; }
+        .article-stats span { font-size: 13px; color: #888; }
+        .hot-tags { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .hot-tags h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 15px; }
+        .tags-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-item { padding: 6px 14px; background: #f5f7fa; border-radius: 15px; font-size: 13px; color: #666; text-decoration: none; transition: all 0.3s; }
+        .tag-item:hover { background: #667eea; color: white; }
+        .quick-links { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .quick-links h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 15px; }
+        .quick-links a { display: block; padding: 12px 15px; background: #f5f7fa; border-radius: 8px; margin-bottom: 10px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .quick-links a:hover { background: #667eea; color: white; }
         .footer { text-align: center; padding: 40px 0; margin-top: 60px; color: #888; font-size: 14px; }
         .footer a { color: #667eea; text-decoration: none; }
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: #28a745; color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 9999; display: none; }
         @media (max-width: 768px) {
+            .main-content { grid-template-columns: 1fr; }
             .stats-section { grid-template-columns: 1fr; }
             .nav { flex-direction: column; gap: 15px; }
             .nav-left, .nav-right { width: 100%; justify-content: center; }
@@ -47,10 +80,13 @@
     </style>
 </head>
 <body>
+<div class="toast" id="toast"></div>
+
 <div class="header">
     <h1>{{ .title }}</h1>
     <p>分享知识，记录生活，探索技术的无限可能</p>
 </div>
+
 <div class="nav">
     <div class="nav-left">
         <a href="/">首页</a>
@@ -66,7 +102,11 @@
     </div>
     <div class="nav-right">
         {{ if .user }}
-            <span>欢迎，{{ .user.Username }}</span>
+            <div class="user-info">
+                <div class="user-avatar">{{ slice .user.Username 0 1 }}</div>
+                <span>{{ .user.Username }}</span>
+                {{ if .user.Level }}<span class="user-level">Lv.{{ .user.Level }}</span>{{ end }}
+            </div>
             <a href="/profile">个人资料</a>
             <a href="/logout">登出</a>
         {{ else }}
@@ -75,14 +115,15 @@
         {{ end }}
     </div>
 </div>
+
 <div class="intro-section">
     <h2>关于本博客</h2>
     <ul>
         <li>基于 Go 语言、Gin 框架和 GORM 开发的现代化博客系统</li>
-        <li>支持用户注册、登录和权限管理</li>
-        <li>支持文章发布、编辑、删除和分类管理</li>
-        <li>支持文章可见性设置（公开/私密）和评论功能</li>
-        <li>支持用户管理和禁用功能</li>
+        <li>支持用户注册、登录、等级系统和每日打卡</li>
+        <li>支持文章发布、编辑、删除、点赞和收藏功能</li>
+        <li>支持问答社区，提问、回答、采纳最佳答案</li>
+        <li>支持教程系统，章节学习、进度记录</li>
         <li>JWT 认证 + Redis 会话管理</li>
     </ul>
 </div>
@@ -102,33 +143,151 @@
     </div>
 </div>
 
-<div class="latest-articles">
-    <h2>最新文章</h2>
-    {{ if .latestArticles }}
-        {{ range .latestArticles }}
-        <div class="article-card">
-            <h3><a href="/article/detail/{{ .ID }}">{{ .Title }}</a></h3>
-            <div class="article-meta">
-                <span>{{ .User.Nickname }}</span>
-                <span>{{ .Category.Name }}</span>
-                <span>{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
-            </div>
-            <div class="article-excerpt">
-                {{ if gt (len .Content) 150 }}
-                    {{ slice .Content 0 150 }}...
-                {{ else }}
-                    {{ .Content }}
+<div class="main-content">
+    <div class="left-content">
+        <div class="latest-articles">
+            <h2>最新文章</h2>
+            {{ if .latestArticles }}
+                {{ range .latestArticles }}
+                <div class="article-card">
+                    <h3><a href="/article/detail/{{ .ID }}">{{ .Title }}</a></h3>
+                    <div class="article-meta">
+                        <span>{{ .User.Nickname }}</span>
+                        <span>{{ .Category.Name }}</span>
+                        <span>{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
+                    </div>
+                    <div class="article-excerpt">
+                        {{ if gt (len .Content) 150 }}
+                            {{ slice .Content 0 150 }}...
+                        {{ else }}
+                            {{ .Content }}
+                        {{ end }}
+                    </div>
+                    <div class="article-stats">
+                        <span>👁 {{ .ViewCount }} 浏览</span>
+                        <span>❤️ {{ .LikeCount }} 点赞</span>
+                        <span>⭐ {{ .FavoriteCount }} 收藏</span>
+                        <span>💬 {{ .CommentCount }} 评论</span>
+                    </div>
+                </div>
                 {{ end }}
+            {{ else }}
+                <div style="text-align: center; padding: 40px; color: #999;">暂无文章，快去发布第一篇吧！</div>
+            {{ end }}
+        </div>
+    </div>
+    
+    <div class="right-sidebar">
+        {{ if .user }}
+        <div class="user-card">
+            <div class="user-card-header">
+                <div class="user-card-avatar">{{ slice .user.Username 0 1 }}</div>
+                <div class="user-card-name">{{ .user.Nickname }}</div>
+                {{ if .user.Level }}<span class="user-card-level">Lv.{{ .user.Level }} {{ if eq .user.Level 1 }}新手{{ else if eq .user.Level 2 }}入门{{ else if eq .user.Level 3 }}初级{{ else if eq .user.Level 4 }}中级{{ else if eq .user.Level 5 }}高级{{ else if eq .user.Level 6 }}资深{{ else if eq .user.Level 7 }}专家{{ else if eq .user.Level 8 }}大师{{ else if eq .user.Level 9 }}宗师{{ else }}传奇{{ end }}</span>{{ end }}
+            </div>
+            <div class="user-stats">
+                <div class="user-stat">
+                    <div class="user-stat-value">{{ if .user.Exp }}{{ .user.Exp }}{{ else }}0{{ end }}</div>
+                    <div class="user-stat-label">经验值</div>
+                </div>
+                <div class="user-stat">
+                    <div class="user-stat-value">{{ if .user.Coins }}{{ .user.Coins }}{{ else }}0{{ end }}</div>
+                    <div class="user-stat-label">金币</div>
+                </div>
+                <div class="user-stat">
+                    <div class="user-stat-value">{{ if .user.CheckinDays }}{{ .user.CheckinDays }}{{ else }}0{{ end }}</div>
+                    <div class="user-stat-label">连续打卡</div>
+                </div>
+            </div>
+            <div class="checkin-section">
+                <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">立即打卡</button>
+                <div class="checkin-info">
+                    已连续打卡 <span class="checkin-days">{{ if .user.CheckinDays }}{{ .user.CheckinDays }}{{ else }}0{{ end }}</span> 天
+                </div>
             </div>
         </div>
+        {{ else }}
+        <div class="user-card" style="text-align: center;">
+            <p style="color: #666; margin-bottom: 15px;">登录后查看个人信息和打卡</p>
+            <a href="/login" class="checkin-btn" style="display: block; text-decoration: none;">去登录</a>
+        </div>
         {{ end }}
-    {{ else }}
-        <div style="text-align: center; padding: 40px; color: #999;">暂无文章，快去发布第一篇吧！</div>
-    {{ end }}
+        
+        <div class="hot-tags">
+            <h3>热门标签</h3>
+            <div class="tags-list" id="hotTags">
+                <a href="/article/list?keyword=Java" class="tag-item">Java</a>
+                <a href="/article/list?keyword=Go" class="tag-item">Go</a>
+                <a href="/article/list?keyword=Python" class="tag-item">Python</a>
+                <a href="/article/list?keyword=前端" class="tag-item">前端</a>
+                <a href="/article/list?keyword=后端" class="tag-item">后端</a>
+                <a href="/article/list?keyword=数据库" class="tag-item">数据库</a>
+                <a href="/article/list?keyword=AI" class="tag-item">AI</a>
+            </div>
+        </div>
+        
+        <div class="quick-links">
+            <h3>快捷入口</h3>
+            <a href="/article/create">✍️ 发布文章</a>
+            <a href="/qa/create">❓ 提出问题</a>
+            <a href="/qa/list">💬 查看问答</a>
+            <a href="/course/list">📚 学习教程</a>
+        </div>
+    </div>
 </div>
 
 <div class="footer">
     <p>© 2026 Go 博客系统 | 基于 <a href="#">Go + Gin + GORM</a> 开发</p>
 </div>
+
+<script>
+function showToast(message, isError) {
+    var toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.style.background = isError ? '#dc3545' : '#28a745';
+    toast.style.display = 'block';
+    setTimeout(function() { toast.style.display = 'none'; }, 3000);
+}
+
+function doCheckin() {
+    var btn = document.getElementById('checkinBtn');
+    btn.disabled = true;
+    btn.textContent = '打卡中...';
+    
+    fetch('/api/checkin', { method: 'POST' })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.error) {
+                showToast(data.error, true);
+                btn.textContent = '立即打卡';
+                btn.disabled = false;
+            } else {
+                showToast('打卡成功！经验+' + data.exp_gained + ' 金币+' + data.coins_gained);
+                btn.textContent = '今日已打卡';
+                btn.disabled = true;
+                setTimeout(function() { location.reload(); }, 1500);
+            }
+        })
+        .catch(function(err) {
+            showToast('打卡失败，请重试', true);
+            btn.textContent = '立即打卡';
+            btn.disabled = false;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    {{ if .user }}
+    fetch('/api/checkin/status')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.checked_in) {
+                var btn = document.getElementById('checkinBtn');
+                btn.textContent = '今日已打卡';
+                btn.disabled = true;
+            }
+        });
+    {{ end }}
+});
+</script>
 </body>
 </html>
