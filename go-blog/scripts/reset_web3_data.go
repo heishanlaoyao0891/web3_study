@@ -413,18 +413,20 @@ func initCourses() {
 	courses := []struct {
 		Title       string
 		Description string
+		Category    string
 	}{
-		{"Solidity从入门到精通", "系统学习Solidity智能合约开发，从基础语法到高级特性"},
-		{"DeFi协议开发实战", "学习开发AMM、借贷协议等DeFi应用"},
-		{"NFT开发完整指南", "从零开发NFT合约，包含白名单、版税等功能"},
-		{"智能合约安全审计", "学习智能合约安全漏洞与审计技术"},
+		{"Solidity从入门到精通", "系统学习Solidity智能合约开发，从基础语法到高级特性", "智能合约"},
+		{"DeFi协议开发实战", "学习开发AMM、借贷协议等DeFi应用", "DeFi"},
+		{"NFT开发完整指南", "从零开发NFT合约，包含白名单、版税等功能", "NFT"},
+		{"智能合约安全审计", "学习智能合约安全漏洞与审计技术", "安全"},
 	}
 
 	for _, c := range courses {
 		course := model.Course{
 			Title:       c.Title,
 			Description: c.Description,
-			UserID:      admin.ID,
+			Category:    c.Category,
+			AuthorID:    admin.ID,
 		}
 		util.Db.Create(&course)
 	}
