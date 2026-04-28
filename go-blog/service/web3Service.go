@@ -112,7 +112,7 @@ func GetInterviewQuestions(c *gin.Context) {
 	difficulty := c.Query("difficulty")
 
 	var questions []model.InterviewQuestion
-	query := util.Db.Preload("User")
+	query := util.Db.Model(&model.InterviewQuestion{})
 
 	if category != "" {
 		query = query.Where("category = ?", category)
