@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>提出问题 - Go博客</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .form-card { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; color: #333; font-weight: 600; font-size: 15px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { min-height: 200px; resize: vertical; font-family: inherit; line-height: 1.6; }
+        .btn { padding: 14px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>提出问题</h1>
+    <p>描述你的问题，获取社区帮助</p>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/course/list">教程</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
+            <a href="/logout">登出</a>
+        {{ end }}
+    </div>
+</div>
+
+<div class="form-card">
+    <form action="/qa/create" method="post">
+        <div class="form-group">
+            <label for="title">问题标题</label>
+            <input type="text" id="title" name="title" placeholder="请输入问题标题" required>
+        </div>
+        <div class="form-group">
+            <label for="content">问题描述</label>
+            <textarea id="content" name="content" placeholder="请详细描述你的问题..." required></textarea>
+        </div>
+        <button type="submit" class="btn">提交问题</button>
+    </form>
+</div>
+</body>
+</html>

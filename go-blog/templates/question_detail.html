@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .question.Title }} - 问答详情</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1000px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; }
+        .nav a:hover { color: #667eea; }
+        .question-card { background: white; border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .question-title { font-size: 24px; color: #1a1a2e; margin-bottom: 15px; }
+        .question-meta { display: flex; gap: 15px; color: #888; font-size: 14px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f0f2f5; }
+        .question-content { color: #333; line-height: 1.8; white-space: pre-wrap; }
+        .badge { padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: 500; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-solved { background: #d4edda; color: #155724; }
+        .answers-section { margin-top: 30px; }
+        .answers-title { font-size: 20px; color: #1a1a2e; margin-bottom: 20px; }
+        .answer-card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .answer-card.best { border: 2px solid #28a745; }
+        .answer-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .answer-author { font-weight: 600; color: #333; }
+        .answer-time { font-size: 13px; color: #888; }
+        .answer-content { color: #555; line-height: 1.7; white-space: pre-wrap; }
+        .answer-actions { margin-top: 15px; padding-top: 15px; border-top: 1px solid #f0f2f5; }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .answer-form { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .answer-form textarea { width: 100%; padding: 14px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 15px; min-height: 120px; resize: vertical; font-family: inherit; }
+        .answer-form textarea:focus { outline: none; border-color: #667eea; }
+        .answer-form button { margin-top: 15px; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .no-answers { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>问答详情</h1>
+    <p>共同探讨，解决疑惑</p>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/course/list">教程</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+
+<div class="question-card">
+    <div class="question-title">
+        {{ .question.Title }}
+        {{ if eq .question.Status 0 }}
+        <span class="badge badge-pending">待解决</span>
+        {{ else }}
+        <span class="badge badge-solved">已解决</span>
+        {{ end }}
+    </div>
+    <div class="question-meta">
+        <span>{{ .question.User.Nickname }}</span>
+        <span>{{ .question.ViewCount }} 浏览</span>
+        <span>{{ .question.CreatedAt.Format "2006-01-02 15:04" }}</span>
+    </div>
+    <div class="question-content">{{ .question.Content }}</div>
+</div>
+
+<div class="answers-section">
+    <h3 class="answers-title">{{ .question.AnswerCount }} 个回答</h3>
+    
+    {{ if .question.Answers }}
+    {{ range .question.Answers }}
+    <div class="answer-card {{ if eq .IsBest 1 }}best{{ end }}">
+        <div class="answer-meta">
+            <span class="answer-author">{{ .User.Nickname }} {{ if eq .IsBest 1 }}✓ 最佳答案{{ end }}</span>
+            <span class="answer-time">{{ .CreatedAt.Format "2006-01-02 15:04" }}</span>
+        </div>
+        <div class="answer-content">{{ .Content }}</div>
+        {{ if and $.user (eq $.question.Status 0) }}
+        <div class="answer-actions">
+            <form action="/qa/accept/{{ .ID }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-success" onclick="return confirm('确定采纳此答案？')">采纳为最佳答案</button>
+            </form>
+        </div>
+        {{ end }}
+    </div>
+    {{ end }}
+    {{ else }}
+    <div class="no-answers">暂无回答，快来抢答吧！</div>
+    {{ end }}
+
+    {{ if .user }}
+    <div class="answer-form">
+        <form action="/qa/answer" method="POST">
+            <input type="hidden" name="question_id" value="{{ .question.ID }}">
+            <textarea name="content" placeholder="写下你的回答..." required></textarea>
+            <button type="submit">提交回答</button>
+        </form>
+    </div>
+    {{ else }}
+    <div style="text-align: center; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+        <a href="/login">登录</a> 后参与回答
+    </div>
+    {{ end }}
+</div>
+</body>
+</html>

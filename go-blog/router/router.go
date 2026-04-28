@@ -119,6 +119,38 @@ func InitRouter() *gin.Engine {
 	r.POST("/register", service.PostRegister)                    // 处理注册请求（不需要认证）
 	r.GET("/logout", requireAuthMiddleware(), service.GetLogout) // 登出（需要认证）
 
+	// API 路由
+	apiGroup := r.Group("/api")
+	{
+		apiGroup.GET("/tags", service.GetTagList)
+		apiGroup.GET("/tags/hot", service.GetHotTags)
+		apiGroup.POST("/like", requireAuthMiddleware(), service.ToggleLike)
+		apiGroup.POST("/favorite", requireAuthMiddleware(), service.ToggleFavorite)
+		apiGroup.GET("/favorites", requireAuthMiddleware(), service.GetUserFavorites)
+		apiGroup.POST("/checkin", requireAuthMiddleware(), service.PostCheckin)
+		apiGroup.GET("/checkin/status", service.GetCheckinStatus)
+		apiGroup.GET("/checkin/rank", service.GetCheckinRank)
+	}
+
+	// 问答路由
+	qaGroup := r.Group("/qa")
+	{
+		qaGroup.GET("/list", service.GetQuestionList)
+		qaGroup.GET("/detail/:id", service.GetQuestionDetail)
+		qaGroup.GET("/create", requireAuthMiddleware(), service.GetQuestionCreate)
+		qaGroup.POST("/create", requireAuthMiddleware(), service.PostQuestionCreate)
+		qaGroup.POST("/answer", requireAuthMiddleware(), service.PostAnswerCreate)
+		qaGroup.POST("/accept/:id", requireAuthMiddleware(), service.PostAcceptAnswer)
+	}
+
+	// 教程路由
+	courseGroup := r.Group("/course")
+	{
+		courseGroup.GET("/list", service.GetCourseList)
+		courseGroup.GET("/detail/:id", service.GetCourseDetail)
+		courseGroup.GET("/:course_id/chapter/:chapter_id", service.GetChapterDetail)
+	}
+
 	return r
 }
 

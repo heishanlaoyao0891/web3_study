@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ .course.Title }} - 教程详情</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; }
+        .nav a:hover { color: #667eea; }
+        .course-info { background: white; border-radius: 16px; padding: 30px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .course-title { font-size: 24px; color: #1a1a2e; margin-bottom: 15px; }
+        .course-desc { color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .course-meta { display: flex; gap: 20px; color: #888; font-size: 14px; }
+        .chapters-section { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .chapters-title { font-size: 20px; color: #1a1a2e; margin-bottom: 20px; }
+        .chapter-item { padding: 15px 20px; border-radius: 8px; margin-bottom: 10px; background: #f8f9fa; transition: all 0.3s; }
+        .chapter-item:hover { background: #667eea; color: white; }
+        .chapter-item a { text-decoration: none; color: inherit; display: flex; justify-content: space-between; align-items: center; }
+        .chapter-order { font-size: 14px; opacity: 0.7; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>{{ .course.Title }}</h1>
+    <p>{{ .course.Category }}</p>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/course/list">教程</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+
+<div class="course-info">
+    <div class="course-title">{{ .course.Title }}</div>
+    <div class="course-desc">{{ .course.Description }}</div>
+    <div class="course-meta">
+        <span>{{ .course.ChapterCount }} 章节</span>
+        <span>{{ .course.ViewCount }} 浏览</span>
+        <span>{{ .course.LikeCount }} 点赞</span>
+    </div>
+</div>
+
+<div class="chapters-section">
+    <h3 class="chapters-title">课程目录</h3>
+    {{ if .course.Chapters }}
+    {{ range .course.Chapters }}
+    <div class="chapter-item">
+        <a href="/course/{{ $.course.ID }}/chapter/{{ .ID }}">
+            <span>{{ .Title }}</span>
+            <span class="chapter-order">第 {{ .SortOrder }} 节</span>
+        </a>
+    </div>
+    {{ end }}
+    {{ else }}
+    <div style="text-align: center; padding: 40px; color: #999;">暂无章节</div>
+    {{ end }}
+</div>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>问答社区 - Go博客</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .page-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .btn { padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
+        .question-card { background: white; border-radius: 12px; padding: 25px; margin-bottom: 15px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s; }
+        .question-card:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
+        .question-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+        .question-title a { text-decoration: none; color: #1a1a2e; }
+        .question-title a:hover { color: #667eea; }
+        .question-meta { display: flex; gap: 15px; color: #888; font-size: 14px; margin-bottom: 10px; }
+        .question-meta span { background: #f5f7fa; padding: 4px 10px; border-radius: 15px; }
+        .question-excerpt { color: #666; line-height: 1.6; }
+        .badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-solved { background: #d4edda; color: #155724; }
+        .pagination { display: flex; justify-content: center; gap: 8px; margin: 30px 0; }
+        .pagination a, .pagination span { padding: 10px 16px; background: white; border-radius: 8px; text-decoration: none; color: #333; font-weight: 500; }
+        .pagination a:hover { background: #667eea; color: white; }
+        .pagination .active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .empty-state { text-align: center; padding: 60px; color: #999; background: white; border-radius: 12px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>问答社区</h1>
+    <p>提出问题，分享知识，共同成长</p>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/course/list">教程</a>
+    </div>
+    <div class="nav-right">
+        {{ if .user }}
+            <span>欢迎，{{ .user.Username }}</span>
+            <a href="/profile">个人资料</a>
+            <a href="/logout">登出</a>
+        {{ else }}
+            <a href="/register">注册</a>
+            <a href="/login">登录</a>
+        {{ end }}
+    </div>
+</div>
+
+<div class="page-actions">
+    <h2>全部问题 ({{ .total }})</h2>
+    {{ if .user }}
+    <a href="/qa/create" class="btn">提出问题</a>
+    {{ end }}
+</div>
+
+{{ if .questions }}
+{{ range .questions }}
+<div class="question-card">
+    <div class="question-title">
+        <a href="/qa/detail/{{ .ID }}">{{ .Title }}</a>
+        {{ if eq .Status 0 }}
+        <span class="badge badge-pending">待解决</span>
+        {{ else }}
+        <span class="badge badge-solved">已解决</span>
+        {{ end }}
+    </div>
+    <div class="question-meta">
+        <span>{{ .User.Nickname }}</span>
+        <span>{{ .AnswerCount }} 回答</span>
+        <span>{{ .ViewCount }} 浏览</span>
+        <span>{{ .CreatedAt.Format "2006-01-02" }}</span>
+    </div>
+    <div class="question-excerpt">{{ if gt (len .Content) 100 }}{{ slice .Content 0 100 }}...{{ else }}{{ .Content }}{{ end }}</div>
+</div>
+{{ end }}
+
+{{ if gt .totalPages 1 }}
+<div class="pagination">
+    {{ range $i := iterate .totalPages }}
+        {{ $pageNum := add $i 1 }}
+        {{ if eq $pageNum $.page }}
+        <span class="active">{{ $pageNum }}</span>
+        {{ else }}
+        <a href="/qa/list?page={{ $pageNum }}">{{ $pageNum }}</a>
+        {{ end }}
+    {{ end }}
+</div>
+{{ end }}
+
+{{ else }}
+<div class="empty-state">暂无问题，快来提出第一个问题吧！</div>
+{{ end }}
+</body>
+</html>

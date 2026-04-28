@@ -54,8 +54,9 @@
 <div class="nav">
     <div class="nav-left">
         <a href="/">首页</a>
-        <a href="/article/list">文章列表</a>
-        <a href="/article/create">发布文章</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/course/list">教程</a>
         {{ if .user }}
             {{ if eq .user.Username "admin" }}
             <a href="/user/list">用户管理</a>

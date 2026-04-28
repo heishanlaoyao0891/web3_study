@@ -90,6 +90,16 @@ func main() {
 		&model.Category{},
 		&model.Article{},
 		&model.Comment{},
+		&model.Tag{},
+		&model.ArticleTag{},
+		&model.Like{},
+		&model.Favorite{},
+		&model.Question{},
+		&model.Answer{},
+		&model.Course{},
+		&model.CourseChapter{},
+		&model.LearningRecord{},
+		&model.Checkin{},
 	)
 	if err != nil {
 		panic("表创建失败：" + err.Error())
