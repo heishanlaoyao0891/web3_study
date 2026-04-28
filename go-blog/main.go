@@ -81,7 +81,9 @@ func main() {
 	// 1. 加载环境变量
 	// 注意：CreateTestDB函数已经加载了环境变量，所以Redis初始化时可以直接使用
 	// 2. 初始化数据库
-	util.CreateTestDB(".env_prod")
+	if err := util.CreateTestDB(".env_prod"); err != nil {
+		panic("数据库连接失败：" + err.Error())
+	}
 	println("数据库初始化成功！")
 	// 自动迁移（创建表，对应Java的DDL脚本/Gorm自动建表）
 	// 注意：生产环境慎用，开发环境方便快捷
@@ -110,7 +112,7 @@ func main() {
 		&model.InterviewQuestion{},
 	)
 	if err != nil {
-		panic("表创建失败：" + err.Error())
+		println("表迁移警告：" + err.Error())
 	}
 	// 3. 初始化Redis
 	err = util.InitRedis(".env_prod")
