@@ -6,8 +6,9 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
-        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; justify-content: space-between; }
         .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
+        .nav a:hover { color: #667eea; }
         .page-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; margin-bottom: 30px; }
         .page-header h1 { font-size: 32px; margin-bottom: 10px; }
         .path-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; }
@@ -26,19 +27,15 @@
 </head>
 <body>
 <div class="nav">
-    <a href="/">首页</a>
-    <a href="/article/list">文章</a>
-    <a href="/interview">面试题</a>
-    <a href="/qa/list">问答</a>
-    <a href="/learning-paths">学习</a>
-    <a href="/snippets">代码</a>
-    <a href="/resources">资源</a>
-</div>
-    <a href="/">首页</a>
-    <a href="/article/list">技术文章</a>
-    <a href="/interview">面试题库</a>
-    <a href="/learning-paths">学习路径</a>
-    <a href="/snippets">代码片段</a>
+    <div>
+        <a href="/">首页</a>
+        <a href="/article/list">文章</a>
+        <a href="/interview">面试题</a>
+        <a href="/qa/list">问答</a>
+        <a href="/learning-paths">学习</a>
+        <a href="/snippets">代码</a>
+        <a href="/resources">资源</a>
+    </div>
 </div>
 
 <div class="page-header">
