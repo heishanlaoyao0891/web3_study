@@ -226,7 +226,7 @@ func GetArticleEdit(c *gin.Context) {
 
 	id := c.Param("id")
 	var article model.Article
-	result := util.Db.Preload("User").Preload("Category").First(&article, id)
+	result := util.Db.Preload("User").Preload("Category").Preload("Categories").First(&article, id)
 	if result.Error != nil {
 		c.HTML(http.StatusNotFound, "index.html", gin.H{
 			"title": "错误 - Go博客",
