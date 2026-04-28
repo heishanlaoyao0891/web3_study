@@ -294,8 +294,27 @@ func GetProfile(c *gin.Context) {
 		return
 	}
 
+	userMap, ok := user.(map[string]interface{})
+	if !ok {
+		c.Redirect(http.StatusFound, "/login")
+		return
+	}
+
+	var userID uint
+	switch v := userMap["ID"].(type) {
+	case uint:
+		userID = v
+	case float64:
+		userID = uint(v)
+	case int:
+		userID = uint(v)
+	}
+
+	var dbUser model.User
+	util.Db.First(&dbUser, userID)
+
 	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"user": user,
+		"user": dbUser,
 	})
 }
 
