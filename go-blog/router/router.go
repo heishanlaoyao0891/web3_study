@@ -164,6 +164,23 @@ func InitRouter() *gin.Engine {
 		courseGroup.GET("/:course_id/chapter/:chapter_id", service.GetChapterDetail)
 	}
 
+	// Web3学习路径
+	r.GET("/learning-paths", service.GetLearningPaths)
+	r.GET("/learning-paths/:id", service.GetLearningPathDetail)
+
+	// 代码片段
+	r.GET("/snippets", service.GetCodeSnippets)
+
+	// 合约模板
+	r.GET("/templates", service.GetContractTemplates)
+
+	// 资源导航
+	r.GET("/resources", service.GetResources)
+
+	// 面试题库
+	r.GET("/interview", service.GetInterviewQuestions)
+	r.GET("/interview/:id", service.GetInterviewQuestionDetail)
+
 	return r
 }
 

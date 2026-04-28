@@ -100,6 +100,12 @@ func main() {
 		&model.CourseChapter{},
 		&model.LearningRecord{},
 		&model.Checkin{},
+		&model.LearningPath{},
+		&model.LearningChapter{},
+		&model.CodeSnippet{},
+		&model.ContractTemplate{},
+		&model.Resource{},
+		&model.InterviewQuestion{},
 	)
 	if err != nil {
 		panic("表创建失败：" + err.Error())
