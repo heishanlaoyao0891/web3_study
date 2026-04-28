@@ -23,6 +23,17 @@ func sub(a, b int) int {
 	return a - b
 }
 
+func mul(a, b int) int {
+	return a * b
+}
+
+func div(a, b int) int {
+	if b == 0 {
+		return 0
+	}
+	return a / b
+}
+
 func iterate(count int) []int {
 	var items []int
 	for i := 0; i < count; i++ {
@@ -59,6 +70,8 @@ func InitRouter() *gin.Engine {
 		// 数学运算
 		"add": add,
 		"sub": sub,
+		"mul": mul,
+		"div": div,
 		// 迭代器
 		"iterate": iterate,
 	})
