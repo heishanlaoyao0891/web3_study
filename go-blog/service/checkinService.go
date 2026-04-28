@@ -9,6 +9,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var chinaLoc *time.Location
+
+func init() {
+	chinaLoc, _ = time.LoadLocation("Asia/Shanghai")
+}
+
+func getChinaTime() time.Time {
+	return time.Now().In(chinaLoc)
+}
+
+func getTodayDate() time.Time {
+	today := getChinaTime().Format("2006-01-02")
+	t, _ := time.ParseInLocation("2006-01-02", today, chinaLoc)
+	return t
+}
+
 func PostCheckin(c *gin.Context) {
 	user := util.GetUserFromContext(c)
 	if user == nil {
@@ -32,8 +48,7 @@ func PostCheckin(c *gin.Context) {
 		userID = uint(v)
 	}
 
-	today := time.Now().Format("2006-01-02")
-	todayTime, _ := time.Parse("2006-01-02", today)
+	todayTime := getTodayDate()
 
 	var existingCheckin model.Checkin
 	result := util.Db.Where("user_id = ? AND checkin_date = ?", userID, todayTime).First(&existingCheckin)
@@ -50,8 +65,8 @@ func PostCheckin(c *gin.Context) {
 	coinsGained := 5
 
 	if dbUser.LastCheckinAt != nil {
-		lastCheckin := dbUser.LastCheckinAt.Format("2006-01-02")
-		yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+		lastCheckin := dbUser.LastCheckinAt.In(chinaLoc).Format("2006-01-02")
+		yesterday := getChinaTime().AddDate(0, 0, -1).Format("2006-01-02")
 		if lastCheckin == yesterday {
 			checkinDays = dbUser.CheckinDays + 1
 			expGained = 10 + checkinDays
@@ -67,10 +82,10 @@ func PostCheckin(c *gin.Context) {
 	}
 	util.Db.Create(&checkin)
 
-	now := time.Now()
+	now := getChinaTime()
 	util.Db.Model(&dbUser).Updates(map[string]interface{}{
 		"checkin_days":    checkinDays,
-		"last_checkin_at": &now,
+		"last_checkin_at": now,
 		"exp":             dbUser.Exp + expGained,
 		"coins":           dbUser.Coins + coinsGained,
 	})
@@ -116,8 +131,7 @@ func GetCheckinStatus(c *gin.Context) {
 		userID = uint(v)
 	}
 
-	today := time.Now().Format("2006-01-02")
-	todayTime, _ := time.Parse("2006-01-02", today)
+	todayTime := getTodayDate()
 
 	var existingCheckin model.Checkin
 	result := util.Db.Where("user_id = ? AND checkin_date = ?", userID, todayTime).First(&existingCheckin)
