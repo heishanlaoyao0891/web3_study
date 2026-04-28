@@ -67,7 +67,7 @@
             <span>分类: {{ .Category }}</span>
             <span>浏览: {{ .ViewCount }}</span>
         </div>
-        <div class="question-content">{{ .Content | slice 0 100 }}...</div>
+        <div class="question-content">{{ slice 0 100 .Content }}...</div>
     </div>
     {{ end }}
     {{ else }}

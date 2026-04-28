@@ -74,6 +74,13 @@ func InitRouter() *gin.Engine {
 		"div": div,
 		// 迭代器
 		"iterate": iterate,
+		// 字符串截取
+		"slice": func(start, end int, s string) string {
+			if len(s) < end {
+				return s
+			}
+			return s[start:end]
+		},
 	})
 
 	// 加载模板文件
