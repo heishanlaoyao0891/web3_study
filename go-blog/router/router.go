@@ -207,6 +207,15 @@ func InitRouter() *gin.Engine {
 		trendingGroup.POST("/offline/:id", service.PostTrendingOffline)
 	}
 
+	// 健康检查（M4.4 无鉴权）
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "ok",
+			"service": "go-blog",
+			"time":    time.Now().Unix(),
+		})
+	})
+
 	return r
 }
 

@@ -5,6 +5,12 @@ import (
 	"go-blog/model"
 	"go-blog/router"
 	"go-blog/util"
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -133,12 +139,26 @@ func initDefaultSources() {
 
 	// 默认掘金源
 	if err := util.Db.Where("type = ? AND name = ?", "juejin", "掘金热门").First(&existing).Error; err != nil {
-		if aiID, ok := domains["Go"]; ok {
+		if di, ok := domains["Go"]; ok {
 			util.Db.Create(&model.ContentSource{
 				Name:     "掘金热门",
 				Type:     "juejin",
 				URL:      "https://juejin.cn",
-				DomainID: aiID,
+				DomainID: di,
+				Cron:     "0 */2 * * *",
+				Enabled:  true,
+			})
+		}
+	}
+
+	// 默认知乎源
+	if err := util.Db.Where("type = ? AND name = ?", "zhihu", "知乎热榜").First(&existing).Error; err != nil {
+		if di, ok := domains["AI"]; ok {
+			util.Db.Create(&model.ContentSource{
+				Name:     "知乎热榜",
+				Type:     "zhihu",
+				URL:      "https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total",
+				DomainID: di,
 				Cron:     "0 */2 * * *",
 				Enabled:  true,
 			})
@@ -224,7 +244,34 @@ func main() {
 	// 7. 初始化路由
 	r := router.InitRouter()
 
-	// 8. 启动服务
-	println("服务启动成功：http://localhost:8081")
-	r.Run(":8081")
+	// 8. 启动 HTTP 服务（带优雅关停）
+	srv := &http.Server{
+		Addr:    ":8081",
+		Handler: r,
+	}
+
+	// 后台启动服务
+	go func() {
+		println("服务启动成功：http://localhost:8081")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP 服务启动失败: %v", err)
+		}
+	}()
+
+	// 等待中断信号，优雅关停
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-quit
+	log.Printf("收到信号 %v，正在关停服务...", sig)
+
+	// 停止抓取调度器
+	crawler.GetScheduler().Stop()
+
+	// 给正在处理的请求最多 10 秒完成
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("服务关停异常: %v", err)
+	}
+	log.Println("服务已安全退出")
 }
