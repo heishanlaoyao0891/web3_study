@@ -14,47 +14,91 @@ import (
 // GetIndex 首页
 func GetIndex(c *gin.Context) {
 	user := util.GetUserFromContext(c)
+	domainID := c.Query("domain") // M3.2 领域筛选
 
+	// 技术领域（顶层分类）
+	var domains []model.Category
+	util.Db.Where("parent_id IS NULL").Order("sort_order desc, id asc").Find(&domains)
+
+	// 解析活跃领域ID
+	var activeDomainID uint
+	var activeDomainName string
+	if domainID != "" {
+		if id, err := strconv.Atoi(domainID); err == nil && id > 0 {
+			activeDomainID = uint(id)
+			for _, d := range domains {
+				if d.ID == activeDomainID {
+					activeDomainName = d.Name
+					break
+				}
+			}
+		}
+	}
+
+	// 统计
 	var articleCount int64
 	var categoryCount int64
 	var userCount int64
-
 	util.Db.Model(&model.Article{}).Count(&articleCount)
 	util.Db.Model(&model.Category{}).Count(&categoryCount)
 	util.Db.Model(&model.User{}).Count(&userCount)
 
+	// 最新资讯（M3.2 按领域筛选）
+	articleQuery := util.Db.Model(&model.Article{}).
+		Preload("User").Preload("Category").Preload("Categories")
+	if activeDomainID > 0 {
+		articleQuery = articleQuery.Where("domain_id = ?", activeDomainID)
+	}
 	var latestArticles []model.Article
-	util.Db.Preload("User").Preload("Category").Preload("Categories").Order("created_at desc").Limit(5).Find(&latestArticles)
+	articleQuery.Order("created_at desc").Limit(6).Find(&latestArticles)
 
-	// 热门标签（M1.4：从 DB 取，替代硬编码）
+	// 面试题（M3.2 三卡之二）
+	questionQuery := util.Db.Model(&model.InterviewQuestion{}).Preload("User")
+	if activeDomainID > 0 {
+		// 通过中间表 interview_question_categories 关联 category
+		questionQuery = questionQuery.
+			Joins("JOIN interview_question_categories iqc ON iqc.interview_question_id = interview_questions.id").
+			Where("iqc.category_id IN (?)",
+				util.Db.Table("categories").Select("id").Where("parent_id = ? OR id = ?", activeDomainID, activeDomainID))
+	}
+	var questions []model.InterviewQuestion
+	questionQuery.Order("created_at desc").Limit(5).Find(&questions)
+
+	// 热门标签
 	var hotTags []model.Tag
 	util.Db.Order("use_count desc, id asc").Limit(10).Find(&hotTags)
 
-	// 技术领域（顶层分类，供导航展示）
-	var domains []model.Category
-	util.Db.Where("parent_id IS NULL").Order("sort_order desc, id asc").Find(&domains)
-
-	// 加载站点配置（M1.3 首页文案去硬编码）
+	// 站点配置
 	siteConfig := loadSiteConfig()
 
-	// 风⼝话题（M3.1 有效话题）
+	// 风口话题（M3.1）
 	var trendingTopics []model.TrendingTopic
 	util.Db.Where("status = ? AND (expire_at IS NULL OR expire_at > ?)", 1, time.Now()).
 		Order("heat_score desc, created_at desc").
 		Limit(5).
 		Find(&trendingTopics)
 
+	// 子分类列表（供领域 Tab 筛选用）
+	var subCategories []model.Category
+	if activeDomainID > 0 {
+		util.Db.Where("parent_id = ?", activeDomainID).Order("sort_order desc").Find(&subCategories)
+	}
+
 	c.HTML(http.StatusOK, "index.html", gin.H{
-		"title": siteConfig["site_title"],
-		"user":  user,
+		"title":           siteConfig["site_title"],
+		"user":            user,
 		"stats": map[string]interface{}{
 			"articleCount":  articleCount,
 			"categoryCount": categoryCount,
 			"userCount":     userCount,
 		},
 		"latestArticles":  latestArticles,
+		"interviewQuestions": questions,
 		"hotTags":         hotTags,
 		"domains":         domains,
+		"activeDomainID":  activeDomainID,
+		"activeDomainName": activeDomainName,
+		"subCategories":    subCategories,
 		"site":            siteConfig,
 		"trendingTopics":  trendingTopics,
 	})
