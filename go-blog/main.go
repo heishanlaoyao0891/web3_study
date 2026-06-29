@@ -197,37 +197,48 @@ func main() {
 	}
 	println("数据库初始化成功！")
 
-	// 2. 自动迁移
-	err := util.Db.AutoMigrate(
-		&model.SiteConfig{},    // M1.3 前置
-		&model.ContentSource{}, // M2.2 前置
-		&model.CrawlLog{},      // M2.2 前置
-		&model.User{},
-		&model.Category{},
-		&model.Article{},
-		&model.Comment{},
-		&model.Tag{},
-		&model.ArticleTag{},
-		&model.ArticleCategory{},
-		&model.InterviewQuestionCategory{},
-		&model.Like{},
-		&model.Favorite{},
-		&model.Question{},
-		&model.Answer{},
-		&model.Course{},
-		&model.CourseChapter{},
-		&model.LearningRecord{},
-		&model.Checkin{},
-		&model.LearningPath{},
-		&model.LearningChapter{},
-		&model.CodeSnippet{},
-		&model.ContractTemplate{},
-		&model.Resource{},
-		&model.InterviewQuestion{},
-		&model.TrendingTopic{}, // M3.1 风口话题
-	)
-	if err != nil {
-		println("表迁移警告：" + err.Error())
+	// 2. 自动迁移（M4.2：仅开发环境执行，生产环境请用 scripts/migrate.go）
+	// 环境变量 APP_ENV=production 或 GO_ENV=production 时跳过 AutoMigrate
+	var err error
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = os.Getenv("GO_ENV")
+	}
+	if env == "production" || env == "prod" {
+		slog.Info("生产环境：跳过 AutoMigrate，请使用 'go run scripts/migrate.go .env_prod' 执行迁移")
+	} else {
+		slog.Info("开发环境：执行 AutoMigrate")
+		err = util.Db.AutoMigrate(
+			&model.SiteConfig{},    // M1.3 前置
+			&model.ContentSource{}, // M2.2 前置
+			&model.CrawlLog{},      // M2.2 前置
+			&model.User{},
+			&model.Category{},
+			&model.Article{},
+			&model.Comment{},
+			&model.Tag{},
+			&model.ArticleTag{},
+			&model.ArticleCategory{},
+			&model.InterviewQuestionCategory{},
+			&model.Like{},
+			&model.Favorite{},
+			&model.Question{},
+			&model.Answer{},
+			&model.Course{},
+			&model.CourseChapter{},
+			&model.LearningRecord{},
+			&model.Checkin{},
+			&model.LearningPath{},
+			&model.LearningChapter{},
+			&model.CodeSnippet{},
+			&model.ContractTemplate{},
+			&model.Resource{},
+			&model.InterviewQuestion{},
+			&model.TrendingTopic{}, // M3.1 风口话题
+		)
+		if err != nil {
+			slog.Warn("表迁移警告：" + err.Error())
+		}
 	}
 
 	// 3. 初始化Redis
