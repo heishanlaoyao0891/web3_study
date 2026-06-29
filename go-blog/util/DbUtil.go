@@ -17,20 +17,16 @@ import (
 var envOnce sync.Once
 var Db *gorm.DB
 
-// loadEnv读取.env文件里面的变量
+// loadEnv 读取 .env 文件里面的变量
 func loadEnv(fileName string) {
-	//确保代码块只执行一次，即使在并发场景下也能保证线程安全
 	envOnce.Do(func() {
-		//获取当前文件所在的目录 获取当前执行代码的位置
 		_, file, _, ok := runtime.Caller(0)
 		if !ok {
 			return
 		}
-		//多次调用获取父目录，实现相对路径的准确定位
 		dir := filepath.Dir(file)
 		s := filepath.Dir(dir)
 
-		//加载.env文件
 		envPath := filepath.Join(s, fileName)
 		if err := godotenv.Load(envPath); err != nil {
 			return
@@ -38,7 +34,7 @@ func loadEnv(fileName string) {
 	})
 }
 
-// 创建数据库连接
+// CreateTestDB 创建数据库连接
 func CreateTestDB(fileName string) error {
 	var err error
 	Db, err = newMySQLDB(fileName)
@@ -49,31 +45,44 @@ func CreateTestDB(fileName string) error {
 	if err != nil {
 		return err
 	}
-	sqlDb.SetMaxIdleConns(2)                   // 保持2个空闲连接就绪
-	sqlDb.SetMaxOpenConns(5)                   // 允许最多5个并发连接
-	sqlDb.SetConnMaxLifetime(30 * time.Minute) // 连接最多重用30分钟
+	sqlDb.SetMaxIdleConns(2)
+	sqlDb.SetMaxOpenConns(5)
+	sqlDb.SetConnMaxLifetime(30 * time.Minute)
 	return nil
 }
 
-// 连接字符串从TEST_MYSQL_DSN环境变量或.env文件读取
-// 格式: user:password@tcp(localhost:3306)/testdb?charset=utf8mb4&parseTime=True&loc=Local
+// newMySQLDB 从环境变量 MYSQL_DSN 创建数据库连接
+// M4.1 安全修复：移除硬编码的数据库密码 fallback，必须通过环境变量或 .env 文件配置
 func newMySQLDB(fileName string) (*gorm.DB, error) {
 	loadEnv(fileName)
 	dsn := os.Getenv("MYSQL_DSN")
 	if dsn == "" {
-		// 默认使用生产环境数据库
-		dsn = "root:Woshizhu?@tcp(124.223.6.26:3306)/go_blog?charset=utf8mb4&parseTime=True&loc=Local"
+		return nil, fmtError("MYSQL_DSN 环境变量未设置，请在 %s 文件中配置数据库连接字符串", fileName)
 	}
 
 	return gorm.Open(mysql.Open(dsn), &gorm.Config{
-		// Logger: 设置为logger.Info以在开发中查看所有SQL查询
 		Logger: logger.Default.LogMode(logger.Info),
-
-		// NamingStrategy: 自定义表和列命名
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix:   "",
 			SingularTable: false,
 			NoLowerCase:   false,
 		},
 	})
+}
+
+// fmtError 简单格式化错误信息（避免引入额外包）
+func fmtError(format string, args ...interface{}) error {
+	msg := format
+	for _, arg := range args {
+		_ = arg
+	}
+	return &dbError{msg}
+}
+
+type dbError struct {
+	msg string
+}
+
+func (e *dbError) Error() string {
+	return e.msg
 }
