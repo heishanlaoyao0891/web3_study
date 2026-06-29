@@ -77,23 +77,72 @@ func initDefaultDomains() {
 
 // initDefaultSources 初始化默认抓取源
 func initDefaultSources() {
-	// 查找 AI 领域 ID（Hacker News 的文章跨度广，先归到 AI 领域做示范）
-	var aiDomain model.Category
-	util.Db.Where("name = ? AND parent_id IS NULL", "AI").First(&aiDomain)
-	if aiDomain.ID == 0 {
-		return // 领域还没建好，跳过
+	// 获取各领域 ID
+	domains := make(map[string]uint)
+	var cats []model.Category
+	util.Db.Where("parent_id IS NULL").Find(&cats)
+	for _, c := range cats {
+		domains[c.Name] = c.ID
+	}
+	if len(domains) == 0 {
+		return
 	}
 
+	// 默认 Hacker News 源
 	var existing model.ContentSource
 	if err := util.Db.Where("type = ? AND name = ?", "hackernews", "Hacker News").First(&existing).Error; err != nil {
-		util.Db.Create(&model.ContentSource{
-			Name:     "Hacker News",
-			Type:     "hackernews",
-			URL:      "https://hacker-news.firebaseio.com/v0/topstories.json",
-			DomainID: aiDomain.ID,
-			Cron:     "0 * * * *", // 每小时整点
-			Enabled:  true,
-		})
+		if aiID, ok := domains["AI"]; ok {
+			util.Db.Create(&model.ContentSource{
+				Name:     "Hacker News",
+				Type:     "hackernews",
+				URL:      "https://hacker-news.firebaseio.com/v0/topstories.json",
+				DomainID: aiID,
+				Cron:     "0 * * * *", // 每小时整点
+				Enabled:  true,
+			})
+		}
+	}
+
+	// 默认 RSS 订阅源
+	rssFeeds := []struct {
+		Name     string
+		URL      string
+		Domain   string
+		Cron     string
+	}{
+		{"Go 官方博客", "https://go.dev/blog/feed.atom", "Go", "0 */2 * * *"},
+		{"InfoQ 中文", "https://www.infoq.cn/feed", "Java", "0 */2 * * *"},
+		{"开源中国", "https://www.oschina.net/news/rss", "Python", "0 */3 * * *"},
+		{"Ethereum 博客", "https://blog.ethereum.org/en/feed.xml", "Web3", "0 */2 * * *"},
+		{"Solidity 博客", "https://soliditylang.org/blog/feed.xml", "Web3", "0 */3 * * *"},
+	}
+	for _, f := range rssFeeds {
+		if err := util.Db.Where("type = ? AND name = ?", "rss", f.Name).First(&existing).Error; err != nil {
+			if domainID, ok := domains[f.Domain]; ok {
+				util.Db.Create(&model.ContentSource{
+					Name:     f.Name,
+					Type:     "rss",
+					URL:      f.URL,
+					DomainID: domainID,
+					Cron:     f.Cron,
+					Enabled:  true,
+				})
+			}
+		}
+	}
+
+	// 默认掘金源
+	if err := util.Db.Where("type = ? AND name = ?", "juejin", "掘金热门").First(&existing).Error; err != nil {
+		if aiID, ok := domains["Go"]; ok {
+			util.Db.Create(&model.ContentSource{
+				Name:     "掘金热门",
+				Type:     "juejin",
+				URL:      "https://juejin.cn",
+				DomainID: aiID,
+				Cron:     "0 */2 * * *",
+				Enabled:  true,
+			})
+		}
 	}
 }
 
