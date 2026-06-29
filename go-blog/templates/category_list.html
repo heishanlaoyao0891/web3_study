@@ -22,14 +22,21 @@
         .btn-delete { background: #dc3545; }
         .btn-delete:hover { box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
         .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
-        .table { width: 100%; border-collapse: collapse; }
-        .table th, .table td { padding: 16px 20px; text-align: left; }
-        .table th { background: #f8f9fa; font-weight: 600; color: #555; border-bottom: 2px solid #e1e5eb; }
-        .table td { border-bottom: 1px solid #f0f2f5; color: #333; }
-        .table tbody tr:hover { background: #fafbfc; }
-        .table tbody tr:last-child td { border-bottom: none; }
-        .category-name { font-weight: 600; color: #1a1a2e; }
-        .category-desc { color: #666; }
+        .domain-section { border-bottom: 1px solid #f0f2f5; }
+        .domain-section:last-child { border-bottom: none; }
+        .domain-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; background: #f8f9fe; cursor: pointer; transition: background 0.2s; }
+        .domain-header:hover { background: #eef0ff; }
+        .domain-header .domain-icon { font-size: 24px; }
+        .domain-header .domain-name { font-size: 16px; font-weight: 700; color: #1a1a2e; flex: 1; }
+        .domain-header .domain-actions { display: flex; gap: 8px; }
+        .domain-children { padding: 0; }
+        .child-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px 12px 56px; border-top: 1px solid #f5f5f5; transition: background 0.2s; }
+        .child-item:hover { background: #fafbfc; }
+        .child-item .child-indent { color: #ccc; font-size: 14px; width: 20px; text-align: center; }
+        .child-item .child-name { font-weight: 500; color: #333; flex: 1; }
+        .child-item .child-desc { color: #888; font-size: 13px; flex: 0 0 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .child-item .child-actions { display: flex; gap: 8px; }
+        .no-children { padding: 20px 20px 20px 56px; color: #bbb; font-size: 14px; border-top: 1px solid #f5f5f5; }
         .actions { display: flex; gap: 8px; }
         .actions form { display: inline; }
         .error { padding: 12px 16px; background: #f8d7da; color: #721c24; border-radius: 8px; margin-bottom: 20px; border: 1px solid #f5c6cb; }
@@ -39,7 +46,7 @@
 <body>
 <div class="header">
     <h1>类别管理</h1>
-    <p>管理文章分类，组织内容结构</p>
+    <p>管理技术领域与主题分类</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -47,7 +54,7 @@
         <a href="/article/list">文章列表</a>
         <a href="/article/create">发布文章</a>
         {{ if .user }}
-            {{ if eq .user.Username "admin" }}
+            {{ if eq .user.Role "admin" }}
             <a href="/user/list">用户管理</a>
             <a href="/category/list">类别管理</a>
             {{ end }}
@@ -71,40 +78,54 @@
     
     <div class="page-header">
         <h2 class="page-title">分类列表</h2>
-        <a href="/category/create" class="btn">添加分类</a>
+        <a href="/category/create" class="btn">+ 添加领域/分类</a>
     </div>
     
     <div class="card">
         {{ if .categories }}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>名称</th>
-                    <th>描述</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{ range .categories }}
-                <tr>
-                    <td>{{ .ID }}</td>
-                    <td class="category-name">{{ .Name }}</td>
-                    <td class="category-desc">{{ if .Desc }}{{ .Desc }}{{ else }}-{{ end }}</td>
-                    <td>
-                        <div class="actions">
-                            <a href="/category/edit/{{ .ID }}" class="btn btn-sm btn-edit">编辑</a>
-                            <form action="/category/delete/{{ .ID }}" method="POST" onsubmit="return confirm('确定要删除此分类吗？');">
-                                <button type="submit" class="btn btn-sm btn-delete">删除</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {{ end }}
-            </tbody>
-        </table>
+        {{ $categories := .categories }}
+        {{ range $categories }}
+            {{ if not .ParentID }}
+            <div class="domain-section">
+                <div class="domain-header">
+                    <span class="domain-icon">{{ if .Icon }}{{ .Icon }}{{ else }}📁{{ end }}</span>
+                    <span class="domain-name">{{ .Name }}</span>
+                    <span style="font-size:12px;color:#999;">{{ if .Desc }}{{ .Desc }}{{ end }}</span>
+                    <div class="domain-actions">
+                        <a href="/category/edit/{{ .ID }}" class="btn btn-sm btn-edit">编辑</a>
+                        <form action="/category/delete/{{ .ID }}" method="POST" onsubmit="return confirm('删除领域「{{ .Name }}」及其所有子分类？');">
+                            <button type="submit" class="btn btn-sm btn-delete">删除</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="domain-children">
+                    {{ $domainID := .ID }}
+                    {{ $hasChild := false }}
+                    {{ range $categories }}
+                        {{ if eq .ParentID $domainID }}
+                            {{ $hasChild = true }}
+                            <div class="child-item">
+                                <span class="child-indent">├</span>
+                                <span class="child-name">{{ .Name }}</span>
+                                <span class="child-desc">{{ if .Desc }}{{ .Desc }}{{ else }}-{{ end }}</span>
+                                <div class="child-actions">
+                                    <a href="/category/edit/{{ .ID }}" class="btn btn-sm btn-edit">编辑</a>
+                                    <form action="/category/delete/{{ .ID }}" method="POST" onsubmit="return confirm('确定删除子分类「{{ .Name }}」？');">
+                                        <button type="submit" class="btn btn-sm btn-delete">删除</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $hasChild }}
+                        <div class="no-children">暂无子分类，点击领域上方「编辑」添加</div>
+                    {{ end }}
+                </div>
+            </div>
+            {{ end }}
+        {{ end }}
         {{ else }}
-        <div class="empty-state">暂无分类，点击上方按钮添加第一个分类吧！</div>
+        <div class="empty-state">暂无分类，点击上方按钮添加第一个领域吧！</div>
         {{ end }}
     </div>
 </div>

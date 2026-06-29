@@ -12,24 +12,28 @@
         .nav-left, .nav-right { display: flex; align-items: center; }
         .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
         .nav a:hover { color: #667eea; }
-        .form-card { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .form-card { max-width: 650px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .form-group { margin-bottom: 25px; }
         .form-group label { display: block; margin-bottom: 10px; color: #333; font-weight: 600; font-size: 15px; }
-        .form-group input { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; transition: all 0.3s; }
-        .form-group input:focus { outline: none; border-color: #667eea; }
-        .form-group textarea { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; min-height: 120px; resize: vertical; font-family: inherit; transition: all 0.3s; }
+        .form-group .label-hint { font-weight: 400; font-size: 13px; color: #999; margin-left: 8px; }
+        .form-group input, .form-group select { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; transition: all 0.3s; box-sizing: border-box; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #667eea; }
+        .form-group textarea { width: 100%; padding: 14px 16px; border: 2px solid #e1e5eb; border-radius: 10px; font-size: 16px; min-height: 100px; resize: vertical; font-family: inherit; transition: all 0.3s; }
         .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { flex: 1; }
         .btn { padding: 14px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); }
         .btn-secondary { background: #6c757d; }
         .form-actions { display: flex; gap: 15px; margin-top: 30px; }
         .error { padding: 12px 16px; background: #f8d7da; color: #721c24; border-radius: 10px; margin-bottom: 20px; }
+        .tip { padding: 12px 16px; background: #e8f4fd; color: #0c5460; border-radius: 10px; margin-bottom: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
 <div class="header">
     <h1>{{ if .category.ID }}编辑分类{{ else }}添加分类{{ end }}</h1>
-    <p>{{ if .category.ID }}修改分类信息{{ else }}创建新的文章分类{{ end }}</p>
+    <p>{{ if .category.ID }}修改分类信息{{ else }}创建新的技术领域或子分类{{ end }}</p>
 </div>
 <div class="nav">
     <div class="nav-left">
@@ -37,7 +41,7 @@
         <a href="/article/list">文章列表</a>
         <a href="/article/create">发布文章</a>
         {{ if .user }}
-            {{ if eq .user.Username "admin" }}
+            {{ if eq .user.Role "admin" }}
             <a href="/user/list">用户管理</a>
             <a href="/category/list">类别管理</a>
             {{ end }}
@@ -58,18 +62,51 @@
     {{ if .error }}
     <div class="error">{{ .error }}</div>
     {{ end }}
+    
+    <div class="tip">
+        💡 <strong>技术领域</strong>（顶层分类）：不选父分类，如图标用 🔗 ☕ 🐹 🐍 🤖<br>
+        💡 <strong>子分类</strong>（主题）：选择一个父领域，如 Web3 → Solidity / DeFi
+    </div>
+    
     <form action="{{ if .category.ID }}/category/edit/{{ .category.ID }}{{ else }}/category/create{{ end }}" method="post">
         <div class="form-group">
             <label for="name">分类名称</label>
-            <input type="text" id="name" name="name" value="{{ .category.Name }}" placeholder="请输入分类名称" required>
+            <input type="text" id="name" name="name" value="{{ .category.Name }}" placeholder="如：Web3、Java、Go、AI" required>
         </div>
         <div class="form-group">
             <label for="desc">分类描述</label>
-            <textarea id="desc" name="desc" placeholder="请输入分类描述（可选）">{{ .category.Desc }}</textarea>
+            <textarea id="desc" name="desc" placeholder="对分类的简要说明">{{ .category.Desc }}</textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="parent_id">所属领域 <span class="label-hint">（不选则为顶层领域）</span></label>
+                <select id="parent_id" name="parent_id">
+                    <option value="">— 作为顶层技术领域 —</option>
+                    {{ if .domains }}
+                        {{ range .domains }}
+                        <option value="{{ .ID }}" {{ if and (not (eq $.category.ID 0)) (eq $.category.ParentID .ID) }}selected{{ end }}>{{ if .Icon }}{{ .Icon }} {{ end }}{{ .Name }}</option>
+                        {{ end }}
+                    {{ end }}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="icon">图标 <span class="label-hint">（Emoji 或 CSS class）</span></label>
+                <input type="text" id="icon" name="icon" value="{{ .category.Icon }}" placeholder="如：🔗、☕、🐹">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="sort_order">排序 <span class="label-hint">（越大越靠前）</span></label>
+                <input type="number" id="sort_order" name="sort_order" value="{{ if .category.SortOrder }}{{ .category.SortOrder }}{{ else }}0{{ end }}" placeholder="0">
+            </div>
+            <div class="form-group">
+                <label>&nbsp;</label>
+                <div style="padding: 14px 16px; color: #999; font-size: 14px;">数字越大，显示越靠前</div>
+            </div>
         </div>
         <div class="form-actions">
             <a href="/category/list" class="btn btn-secondary">取消</a>
-            <button type="submit" class="btn">保存</button>
+            <button type="submit" class="btn">{{ if .category.ID }}保存修改{{ else }}创建分类{{ end }}</button>
         </div>
     </form>
 </div>
