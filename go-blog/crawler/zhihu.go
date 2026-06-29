@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -124,6 +124,6 @@ type zhihuTarget struct {
 }
 
 func init() {
-	log.Println("[crawler] 注册知乎适配器")
+	slog.Info("注册知乎适配器")
 	Register(NewZhihuCrawler())
 }

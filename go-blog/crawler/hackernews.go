@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -106,5 +107,6 @@ func (h *HackerNewsCrawler) fetchItem(ctx context.Context, id int) (RawItem, err
 }
 
 func init() {
+	slog.Info("注册 Hacker News 适配器")
 	Register(&HackerNewsCrawler{})
 }

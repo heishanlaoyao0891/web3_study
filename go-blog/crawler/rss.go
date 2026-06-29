@@ -5,7 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -211,6 +211,6 @@ func parseRSSDate(s string) (time.Time, error) {
 }
 
 func init() {
-	log.Println("[crawler] 注册 RSS 适配器")
+	slog.Info("注册 RSS 适配器")
 	Register(NewRSSCrawler())
 }

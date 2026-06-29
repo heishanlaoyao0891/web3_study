@@ -6,7 +6,7 @@ import (
 	"go-blog/router"
 	"go-blog/util"
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -186,6 +186,11 @@ func startAutoRestoreTask() {
 }
 
 func main() {
+	// 0. 初始化结构化日志（M4.3）
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})))
+
 	// 1. 初始化数据库
 	if err := util.CreateTestDB(".env_prod"); err != nil {
 		panic("数据库连接失败：" + err.Error())
@@ -254,7 +259,7 @@ func main() {
 	go func() {
 		println("服务启动成功：http://localhost:8081")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("HTTP 服务启动失败: %v", err)
+			slog.Error("HTTP 服务启动失败", "error", err)
 		}
 	}()
 
@@ -262,7 +267,7 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
-	log.Printf("收到信号 %v，正在关停服务...", sig)
+	slog.Info("收到关停信号", "signal", sig.String())
 
 	// 停止抓取调度器
 	crawler.GetScheduler().Stop()
@@ -271,7 +276,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("服务关停异常: %v", err)
+		slog.Error("服务关停异常", "error", err)
 	}
-	log.Println("服务已安全退出")
+	slog.Info("服务已安全退出")
 }

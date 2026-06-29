@@ -4,7 +4,7 @@ import (
 	"go-blog/service"
 	"go-blog/util"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -241,17 +241,25 @@ func loggerMiddleware() gin.HandlerFunc {
 		since := time.Since(start)
 		clientIP := c.ClientIP()
 		status := c.Writer.Status()
-		log.Printf("[%s] %s %s %s %d %v\n", clientIP, path, raw, method, status, since)
+		slog.Info("HTTP",
+			"method", method,
+			"path", path,
+			"status", status,
+			"ip", clientIP,
+			"duration", since.String(),
+			"raw", raw,
+		)
 	}
 }
 
 // 全局异常中间件
 func recoveryMiddleware() gin.HandlerFunc {
 	return gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
-		// 记录异常信息
-		log.Printf("Panic recovered: %v", recovered)
-		// 可以添加堆栈信息
-		log.Printf("Stack trace: %s", debug.Stack())
+		slog.Error("Panic recovered",
+			"error", recovered,
+			"path", c.Request.URL.Path,
+			"stack", string(debug.Stack()),
+		)
 
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Internal Server Error",

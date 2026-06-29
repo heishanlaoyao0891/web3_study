@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -133,7 +133,7 @@ type juejinUser struct {
 }
 
 func init() {
-	log.Println("[crawler] 注册掘金适配器")
+	slog.Info("注册掘金适配器")
 	Register(NewJuejinCrawler())
 }
 
