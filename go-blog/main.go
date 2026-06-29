@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go-blog/crawler"
 	"go-blog/model"
 	"go-blog/router"
 	"go-blog/util"
@@ -24,7 +25,6 @@ func initData() {
 		}
 		util.Db.Create(&admin)
 	} else if user.Role != "admin" {
-		// 兼容旧数据：给已存在的 admin 用户补上 Role
 		user.Role = "admin"
 		util.Db.Save(&user)
 	}
@@ -34,6 +34,9 @@ func initData() {
 
 	// 默认技术领域（顶层分类）
 	initDefaultDomains()
+
+	// 默认抓取源（M2 打样）
+	initDefaultSources()
 
 	println("初始化数据成功！")
 }
@@ -72,6 +75,28 @@ func initDefaultDomains() {
 	}
 }
 
+// initDefaultSources 初始化默认抓取源
+func initDefaultSources() {
+	// 查找 AI 领域 ID（Hacker News 的文章跨度广，先归到 AI 领域做示范）
+	var aiDomain model.Category
+	util.Db.Where("name = ? AND parent_id IS NULL", "AI").First(&aiDomain)
+	if aiDomain.ID == 0 {
+		return // 领域还没建好，跳过
+	}
+
+	var existing model.ContentSource
+	if err := util.Db.Where("type = ? AND name = ?", "hackernews", "Hacker News").First(&existing).Error; err != nil {
+		util.Db.Create(&model.ContentSource{
+			Name:     "Hacker News",
+			Type:     "hackernews",
+			URL:      "https://hacker-news.firebaseio.com/v0/topstories.json",
+			DomainID: aiDomain.ID,
+			Cron:     "0 * * * *", // 每小时整点
+			Enabled:  true,
+		})
+	}
+}
+
 // startAutoRestoreTask 定时任务：自动恢复被禁用的用户
 func startAutoRestoreTask() {
 	go func() {
@@ -98,9 +123,11 @@ func main() {
 	}
 	println("数据库初始化成功！")
 
-	// 2. 自动迁移（开发环境使用，生产环境应改为独立迁移脚本）
+	// 2. 自动迁移
 	err := util.Db.AutoMigrate(
-		&model.SiteConfig{}, // M1.3 新增（前置，避免其他表迁移错误中断）
+		&model.SiteConfig{},    // M1.3 前置
+		&model.ContentSource{}, // M2.2 前置
+		&model.CrawlLog{},      // M2.2 前置
 		&model.User{},
 		&model.Category{},
 		&model.Article{},
@@ -141,10 +168,13 @@ func main() {
 	startAutoRestoreTask()
 	println("自动恢复任务启动成功！")
 
-	// 6. 初始化路由
+	// 6. 启动抓取调度器（M2.1）
+	crawler.GetScheduler().Start()
+
+	// 7. 初始化路由
 	r := router.InitRouter()
 
-	// 7. 启动服务
+	// 8. 启动服务
 	println("服务启动成功：http://localhost:8081")
 	r.Run(":8081")
 }

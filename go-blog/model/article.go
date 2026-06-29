@@ -19,6 +19,11 @@ type Article struct {
 	LikeCount     int            `gorm:"default:0" json:"like_count"`
 	FavoriteCount int            `gorm:"default:0" json:"favorite_count"`
 	CommentCount  int            `gorm:"default:0" json:"comment_count"`
+	// 抓取来源标记（M2.3）：手动创建的文章这些字段为零值
+	Source    string `gorm:"size:50;index" json:"source"`   // 来源标识，如 "hackernews" / "juejin"
+	SourceURL string `gorm:"size:500" json:"source_url"`    // 原文链接
+	RawID     string `gorm:"size:100;index" json:"raw_id"`  // 源站唯一ID，去重用
+	DomainID  uint   `gorm:"index" json:"domain_id"`        // 归属技术领域（顶层Category ID）
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
