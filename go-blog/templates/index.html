@@ -72,6 +72,19 @@
         .quick-links h3 { font-size: 16px; color: #1a1a2e; margin-bottom: 15px; }
         .quick-links a { display: block; padding: 12px 15px; background: #f5f7fa; border-radius: 8px; margin-bottom: 10px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
         .quick-links a:hover { background: #667eea; color: white; }
+        .trending-section { background: white; padding: 30px; border-radius: 20px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 2px solid #fff3e0; }
+        .trending-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .trending-header h2 { color: #1a1a2e; font-size: 22px; }
+        .trending-badge { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 3px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; letter-spacing: 1px; animation: pulse-badge 2s ease-in-out infinite; }
+        @keyframes pulse-badge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .trending-list { display: flex; flex-direction: column; gap: 10px; }
+        .trending-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: #fffbee; border-radius: 12px; text-decoration: none; transition: all 0.3s; }
+        .trending-item:hover { background: #fff8e1; transform: translateX(5px); box-shadow: 0 2px 10px rgba(255, 152, 0, 0.15); }
+        .trending-rank { font-size: 18px; flex-shrink: 0; }
+        .trending-title { font-size: 15px; font-weight: 600; color: #1a1a2e; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .trending-summary { font-size: 13px; color: #888; flex: 0 0 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: none; }
+        @media (min-width: 768px) { .trending-summary { display: inline; } }
+        .trending-heat { font-size: 13px; color: #ff6b00; font-weight: 700; background: #fff3e0; padding: 3px 10px; border-radius: 10px; white-space: nowrap; }
         .footer { text-align: center; padding: 40px 0; margin-top: 60px; color: #888; font-size: 14px; }
         .footer a { color: #667eea; text-decoration: none; }
         .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; background: #28a745; color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 9999; display: none; }
@@ -141,6 +154,27 @@
         <li>代码片段与模板，提升开发效率</li>
     </ul>
 </div>
+
+{{ if .trendingTopics }}
+<div class="trending-section">
+    <div class="trending-header">
+        <h2>🔥 风口话题</h2>
+        <span class="trending-badge">HOT</span>
+    </div>
+    <div class="trending-list">
+        {{ range .trendingTopics }}
+        <a href="{{ if .URL }}{{ .URL }}{{ else }}#{{ end }}" class="trending-item" {{ if .URL }}target="_blank" rel="noopener"{{ end }}>
+            <span class="trending-rank">
+                {{ if le .HeatScore 80 }}🔴{{ else if le .HeatScore 50 }}🟠{{ else }}🟢{{ end }}
+            </span>
+            <span class="trending-title">{{ .Title }}</span>
+            {{ if .Summary }}<span class="trending-summary">{{ slice .Summary 0 60 }}{{ if gt (len .Summary) 60 }}…{{ end }}</span>{{ end }}
+            <span class="trending-heat">{{ .HeatScore }}°</span>
+        </a>
+        {{ end }}
+    </div>
+</div>
+{{ end }}
 
 <div class="stats-section">
     <div class="stat-card">

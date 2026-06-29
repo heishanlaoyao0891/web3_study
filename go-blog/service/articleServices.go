@@ -6,6 +6,7 @@ import (
 	"go-blog/util"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,6 +37,13 @@ func GetIndex(c *gin.Context) {
 	// 加载站点配置（M1.3 首页文案去硬编码）
 	siteConfig := loadSiteConfig()
 
+	// 风⼝话题（M3.1 有效话题）
+	var trendingTopics []model.TrendingTopic
+	util.Db.Where("status = ? AND (expire_at IS NULL OR expire_at > ?)", 1, time.Now()).
+		Order("heat_score desc, created_at desc").
+		Limit(5).
+		Find(&trendingTopics)
+
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"title": siteConfig["site_title"],
 		"user":  user,
@@ -44,10 +52,11 @@ func GetIndex(c *gin.Context) {
 			"categoryCount": categoryCount,
 			"userCount":     userCount,
 		},
-		"latestArticles": latestArticles,
+		"latestArticles":  latestArticles,
 		"hotTags":         hotTags,
 		"domains":         domains,
 		"site":            siteConfig,
+		"trendingTopics":  trendingTopics,
 	})
 }
 
