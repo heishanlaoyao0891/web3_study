@@ -102,22 +102,6 @@ func PostQuestionCreate(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
 	title := c.PostForm("title")
 	content := c.PostForm("content")
 
@@ -127,7 +111,7 @@ func PostQuestionCreate(c *gin.Context) {
 	}
 
 	question := model.Question{
-		UserID:  userID,
+		UserID:  user.ID,
 		Title:   title,
 		Content: content,
 	}
@@ -143,35 +127,18 @@ func PostAnswerCreate(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
 	questionID := c.PostForm("question_id")
 	content := c.PostForm("content")
 
-	var qID uint
-	for _, ch := range questionID {
-		if ch >= '0' && ch <= '9' {
-			qID = qID*10 + uint(ch-'0')
-		}
+	qID, err := strconv.ParseUint(questionID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "问题ID无效"})
+		return
 	}
 
 	answer := model.Answer{
-		QuestionID: qID,
-		UserID:     userID,
+		QuestionID: uint(qID),
+		UserID:     user.ID,
 		Content:    content,
 	}
 
@@ -188,22 +155,6 @@ func PostAcceptAnswer(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
 	answerID := c.Param("id")
 	var answer model.Answer
 	result := util.Db.First(&answer, answerID)
@@ -215,14 +166,14 @@ func PostAcceptAnswer(c *gin.Context) {
 	var question model.Question
 	util.Db.First(&question, answer.QuestionID)
 
-	if question.UserID != userID {
+	if question.UserID != user.ID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "只有提问者可以采纳答案"})
 		return
 	}
 
 	util.Db.Model(&answer).Update("is_best", 1)
 	util.Db.Model(&question).Updates(map[string]interface{}{
-		"status":        1,
+		"status":         1,
 		"best_answer_id": answer.ID,
 	})
 

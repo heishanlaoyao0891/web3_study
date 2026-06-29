@@ -16,26 +16,6 @@ func PostCommentCreate(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	idValue := userMap["ID"]
-	switch v := idValue.(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户ID类型错误"})
-		return
-	}
-
 	articleIDStr := c.PostForm("article_id")
 	content := c.PostForm("content")
 	parentIDStr := c.PostForm("parent_id")
@@ -55,7 +35,7 @@ func PostCommentCreate(c *gin.Context) {
 	comment := model.Comment{
 		Content:   content,
 		ArticleID: uint(articleID),
-		UserID:    userID,
+		UserID:    user.ID,
 	}
 
 	if parentIDStr != "" {
@@ -81,27 +61,7 @@ func PostCommentDelete(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusForbidden, gin.H{"error": "无权限删除此评论"})
-		return
-	}
-
-	isAdmin := userMap["Username"] == "admin"
-	var userID uint
-	idValue := userMap["ID"]
-	switch v := idValue.(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	default:
-		userID = 0
-	}
-
-	if !isAdmin && userID != comment.UserID {
+	if !util.IsAdmin(c) && user.ID != comment.UserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权限删除此评论"})
 		return
 	}

@@ -10,56 +10,74 @@ func UintPtr(v uint) *uint {
 	return &v
 }
 
-// GetUserFromContext 从上下文中获取用户信息
-func GetUserFromContext(c *gin.Context) interface{} {
-	// 先尝试从Gin上下文中获取用户信息
-	if user, exists := c.Get("user"); exists {
-		return user
-	}
+// contextUserKey 存入 gin.Context 的用户键
+const contextUserKey = "currentUser"
 
-	// 从cookie中获取令牌
-	token, err := c.Cookie("token")
-	var user interface{}
-
-	if err == nil && token != "" {
-		// 解析JWT令牌
-		claims, err := ParseToken(token)
-		if err == nil {
-			// 从Redis中获取用户会话（会自动续期）
-			tokenFromRedis, err := GetUserSession(claims.UserID)
-			if err == nil && tokenFromRedis == token {
-				// 检查用户状态
-				var dbUser model.User
-				result := Db.First(&dbUser, claims.UserID)
-				if result.Error == nil && dbUser.Status == 1 {
-					// 设置用户信息
-					user = map[string]interface{}{
-						"ID":       claims.UserID,
-						"Username": claims.Username,
-					}
-					// 将用户信息存储到Gin上下文中
-					c.Set("user", user)
-					// 更新cookie中的token过期时间（30分钟）
-					c.SetCookie("token", token, 30*60, "/", "", false, true)
-				} else {
-					// 用户被禁用，删除会话
-					DeleteUserSession(claims.UserID)
-					// 清除cookie
-					c.SetCookie("token", "", -1, "/", "", false, true)
-				}
-			}
+// GetUserFromContext 从上下文中获取当前登录用户，未登录返回 nil
+// 一次请求内最多查库一次，后续从 context 缓存读取
+func GetUserFromContext(c *gin.Context) *model.User {
+	// 优先从本次请求缓存读
+	if v, exists := c.Get(contextUserKey); exists {
+		if u, ok := v.(*model.User); ok {
+			return u
 		}
 	}
 
-	return user
+	// 从 cookie 取 JWT
+	token, err := c.Cookie("token")
+	if err != nil || token == "" {
+		return nil
+	}
+
+	claims, err := ParseToken(token)
+	if err != nil {
+		return nil
+	}
+
+	// 校验 Redis 会话（顺带续期）
+	tokenFromRedis, err := GetUserSession(claims.UserID)
+	if err != nil || tokenFromRedis != token {
+		return nil
+	}
+
+	// 查库确认用户状态
+	var user model.User
+	if result := Db.First(&user, claims.UserID); result.Error != nil {
+		return nil
+	}
+	if user.Status != 1 {
+		DeleteUserSession(claims.UserID)
+		c.SetCookie("token", "", -1, "/", "", false, true)
+		return nil
+	}
+
+	// 缓存 + 续期 cookie
+	c.Set(contextUserKey, &user)
+	c.SetCookie("token", token, 30*60, "/", "", false, true)
+	return &user
 }
 
-// RequireAuth 要求用户登录
-func RequireAuth(c *gin.Context) (interface{}, bool) {
-	user := GetUserFromContext(c)
-	if user == nil {
+// IsAdmin 判断当前用户是否管理员（基于 Role 字段）
+func IsAdmin(c *gin.Context) bool {
+	u := GetUserFromContext(c)
+	return u != nil && u.Role == "admin"
+}
+
+// CurrentUserID 获取当前用户 ID，未登录返回 0
+func CurrentUserID(c *gin.Context) uint {
+	u := GetUserFromContext(c)
+	if u == nil {
+		return 0
+	}
+	return u.ID
+}
+
+// RequireAuth 要求用户登录，返回用户指针；未登录重定向到登录页
+func RequireAuth(c *gin.Context) (*model.User, bool) {
+	u := GetUserFromContext(c)
+	if u == nil {
 		c.Redirect(302, "/login")
 		return nil, false
 	}
-	return user, true
+	return u, true
 }

@@ -232,12 +232,10 @@ func recoveryMiddleware() gin.HandlerFunc {
 	})
 }
 
-// 认证中间件
+// 认证中间件：将当前用户注入到上下文（未登录不阻断）
 func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 从上下文中获取用户信息
 		user := util.GetUserFromContext(c)
-		// 将用户信息存储到上下文中，方便后续处理函数使用
 		c.Set("user", user)
 		c.Next()
 	}
@@ -246,15 +244,12 @@ func authMiddleware() gin.HandlerFunc {
 // 要求认证中间件（用于需要登录的路由）
 func requireAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 从上下文中获取用户信息
 		user := util.GetUserFromContext(c)
 		if user == nil {
-			// 未登录，重定向到登录页面
 			c.Redirect(http.StatusFound, "/login")
 			c.Abort()
 			return
 		}
-		// 将用户信息存储到上下文中
 		c.Set("user", user)
 		c.Next()
 	}

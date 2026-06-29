@@ -32,22 +32,7 @@ func PostCheckin(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
+	userID := user.ID
 	todayTime := getTodayDate()
 
 	var existingCheckin model.Checkin
@@ -87,11 +72,11 @@ func PostCheckin(c *gin.Context) {
 		"checkin_days":    checkinDays,
 		"last_checkin_at": now,
 		"exp":             dbUser.Exp + expGained,
-		"coins":           dbUser.Coins + coinsGained,
+		"coins":            dbUser.Coins + coinsGained,
 	})
 
 	newLevel := dbUser.Level
-	for expNeeded := dbUser.Level * 100; dbUser.Exp+expGained >= expNeeded; expNeeded = newLevel * 100 {
+	for expNeeded := dbUser.Level * 100; dbUser.Exp+expGained >= expNeeded; expNeeded = newLevel*100 {
 		newLevel++
 	}
 	if newLevel > dbUser.Level {
@@ -115,26 +100,9 @@ func GetCheckinStatus(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusOK, gin.H{"checked_in": false})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
 	todayTime := getTodayDate()
-
 	var existingCheckin model.Checkin
-	result := util.Db.Where("user_id = ? AND checkin_date = ?", userID, todayTime).First(&existingCheckin)
+	result := util.Db.Where("user_id = ? AND checkin_date = ?", user.ID, todayTime).First(&existingCheckin)
 
 	c.JSON(http.StatusOK, gin.H{
 		"checked_in": result.Error == nil,

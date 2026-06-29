@@ -4,6 +4,7 @@ import (
 	"go-blog/model"
 	"go-blog/util"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,24 +17,7 @@ func ToggleLike(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户ID类型错误"})
-		return
-	}
+	userID := user.ID
 
 	targetType := c.PostForm("target_type")
 	targetID := c.PostForm("target_id")
@@ -51,15 +35,10 @@ func ToggleLike(c *gin.Context) {
 		return
 	}
 
-	var targetIDUint uint
-	for _, ch := range targetID {
-		if ch < '0' || ch > '9' {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的目标ID"})
-			return
-		}
-	}
-	for i := 0; i < len(targetID); i++ {
-		targetIDUint = targetIDUint*10 + uint(targetID[i]-'0')
+	targetIDUint, err := strconv.ParseUint(targetID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的目标ID"})
+		return
 	}
 
 	var existingLike model.Like
@@ -78,7 +57,7 @@ func ToggleLike(c *gin.Context) {
 		like := model.Like{
 			UserID:     userID,
 			TargetType: tType,
-			TargetID:   targetIDUint,
+			TargetID:   uint(targetIDUint),
 		}
 		util.Db.Create(&like)
 		switch tType {
@@ -98,24 +77,7 @@ func ToggleFavorite(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	default:
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户ID类型错误"})
-		return
-	}
+	userID := user.ID
 
 	targetType := c.PostForm("target_type")
 	targetID := c.PostForm("target_id")
@@ -131,15 +93,10 @@ func ToggleFavorite(c *gin.Context) {
 		return
 	}
 
-	var targetIDUint uint
-	for _, ch := range targetID {
-		if ch < '0' || ch > '9' {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "无效的目标ID"})
-			return
-		}
-	}
-	for i := 0; i < len(targetID); i++ {
-		targetIDUint = targetIDUint*10 + uint(targetID[i]-'0')
+	targetIDUint, err := strconv.ParseUint(targetID, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的目标ID"})
+		return
 	}
 
 	var existingFav model.Favorite
@@ -155,7 +112,7 @@ func ToggleFavorite(c *gin.Context) {
 		fav := model.Favorite{
 			UserID:     userID,
 			TargetType: tType,
-			TargetID:   targetIDUint,
+			TargetID:   uint(targetIDUint),
 		}
 		util.Db.Create(&fav)
 		if tType == 1 {
@@ -172,24 +129,8 @@ func GetUserFavorites(c *gin.Context) {
 		return
 	}
 
-	userMap, ok := user.(map[string]interface{})
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "用户信息错误"})
-		return
-	}
-
-	var userID uint
-	switch v := userMap["ID"].(type) {
-	case uint:
-		userID = v
-	case float64:
-		userID = uint(v)
-	case int:
-		userID = uint(v)
-	}
-
 	var favorites []model.Favorite
-	util.Db.Where("user_id = ?", userID).Find(&favorites)
+	util.Db.Where("user_id = ?", user.ID).Find(&favorites)
 
 	var articleIDs []uint
 	for _, fav := range favorites {

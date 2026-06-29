@@ -9,85 +9,98 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// initData 初始化默认数据
 func initData() {
 	// 检查是否已经存在admin用户
 	var user model.User
 	result := util.Db.Where("username = ?", "admin").First(&user)
 	if result.Error != nil {
-		// 创建测试用户
 		password, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
-		user := model.User{
+		admin := model.User{
 			Username: "admin",
 			Password: string(password),
 			Nickname: "管理员",
+			Role:     "admin",
 		}
-		util.Db.Create(&user)
+		util.Db.Create(&admin)
+	} else if user.Role != "admin" {
+		// 兼容旧数据：给已存在的 admin 用户补上 Role
+		user.Role = "admin"
+		util.Db.Save(&user)
 	}
 
-	// 检查是否已经存在技术分类
-	var category model.Category
-	result = util.Db.Where("name = ?", "技术").First(&category)
-	if result.Error != nil {
-		// 创建测试分类
-		category := model.Category{
-			Name: "技术",
-			Desc: "技术相关文章",
-		}
-		util.Db.Create(&category)
-	}
+	// 默认站点配置（M1.3）
+	initSiteConfig()
 
-	// 检查是否已经存在测试文章
-	var article model.Article
-	result = util.Db.Where("title = ?", "Go语言入门").First(&article)
-	if result.Error != nil {
-		// 创建测试文章
-		article := model.Article{
-			Title:      "Go语言入门",
-			Content:    "Go语言是Google开发的一种静态强类型、编译型、并发型，并具有垃圾回收功能的编程语言。\n\nGo语言的设计目标是：\n1. 简洁、快速、安全\n2. 并行、有趣、开源\n3. 内存管理、数组安全、编译迅速",
-			Status:     1,
-			UserID:     user.ID,
-			CategoryID: category.ID,
-		}
-		util.Db.Create(&article)
-	}
+	// 默认技术领域（顶层分类）
+	initDefaultDomains()
 
 	println("初始化数据成功！")
 }
 
-// 定时任务：自动恢复被禁用的用户
+// initSiteConfig 写入默认站点配置
+func initSiteConfig() {
+	defaults := map[string]string{
+		model.CfgSiteTitle:      "技术学习平台",
+		model.CfgSiteSubtitle:   "Java | Go | Python | AI | Web3 | 全栈技术社区",
+		model.CfgSiteIntroTitle: "技术开发者社区",
+		model.CfgFooterText:     "© 2026 技术学习平台 | 基于 Go + Gin + GORM 开发",
+		model.CfgFooterSubtext:  "专注全栈技术学习 | 面试题库 | 资讯推送",
+	}
+	for key, val := range defaults {
+		var cfg model.SiteConfig
+		if err := util.Db.Where("config_key = ?", key).First(&cfg).Error; err != nil {
+			util.Db.Create(&model.SiteConfig{Key: key, Value: val, Category: "brand", Desc: key})
+		}
+	}
+}
+
+// initDefaultDomains 初始化默认技术领域（顶层分类）
+func initDefaultDomains() {
+	domains := []model.Category{
+		{Name: "Web3", Desc: "区块链与智能合约开发", Icon: "🔗", SortOrder: 50},
+		{Name: "Java", Desc: "Java后端开发", Icon: "☕", SortOrder: 40},
+		{Name: "Go", Desc: "Go语言开发", Icon: "🐹", SortOrder: 30},
+		{Name: "Python", Desc: "Python开发", Icon: "🐍", SortOrder: 20},
+		{Name: "AI", Desc: "人工智能与机器学习", Icon: "🤖", SortOrder: 10},
+	}
+	for _, d := range domains {
+		var existing model.Category
+		if err := util.Db.Where("name = ?", d.Name).First(&existing).Error; err != nil {
+			util.Db.Create(&d)
+		}
+	}
+}
+
+// startAutoRestoreTask 定时任务：自动恢复被禁用的用户
 func startAutoRestoreTask() {
 	go func() {
-		// 每隔1分钟检查一次
 		ticker := time.NewTicker(1 * time.Minute)
 		defer ticker.Stop()
 
 		for range ticker.C {
-			// 查找所有被禁用且禁用时间已到的用户
 			var users []model.User
 			util.Db.Where("status = ? AND disable_until IS NOT NULL AND disable_until < ?", 0, time.Now()).Find(&users)
 
-			// 恢复这些用户
 			for _, user := range users {
 				user.Status = 1
 				user.DisableUntil = nil
 				util.Db.Save(&user)
-				println("自动恢复用户：" + user.Username)
 			}
 		}
 	}()
 }
 
 func main() {
-	// 1. 加载环境变量
-	// 注意：CreateTestDB函数已经加载了环境变量，所以Redis初始化时可以直接使用
-	// 2. 初始化数据库
+	// 1. 初始化数据库
 	if err := util.CreateTestDB(".env_prod"); err != nil {
 		panic("数据库连接失败：" + err.Error())
 	}
 	println("数据库初始化成功！")
-	// 自动迁移（创建表，对应Java的DDL脚本/Gorm自动建表）
-	// 注意：生产环境慎用，开发环境方便快捷
+
+	// 2. 自动迁移（开发环境使用，生产环境应改为独立迁移脚本）
 	err := util.Db.AutoMigrate(
+		&model.SiteConfig{}, // M1.3 新增（前置，避免其他表迁移错误中断）
 		&model.User{},
 		&model.Category{},
 		&model.Article{},
@@ -114,16 +127,20 @@ func main() {
 	if err != nil {
 		println("表迁移警告：" + err.Error())
 	}
+
 	// 3. 初始化Redis
 	err = util.InitRedis(".env_prod")
 	if err != nil {
 		println("Redis初始化失败：" + err.Error())
 	}
+
 	// 4. 初始化测试数据
 	initData()
+
 	// 5. 启动自动恢复任务
 	startAutoRestoreTask()
 	println("自动恢复任务启动成功！")
+
 	// 6. 初始化路由
 	r := router.InitRouter()
 

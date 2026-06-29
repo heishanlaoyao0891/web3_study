@@ -13,6 +13,7 @@ type User struct {
 	Nickname      string         `gorm:"size:50" json:"nickname"`
 	Avatar        string         `gorm:"size:255" json:"avatar"`
 	Bio           string         `gorm:"type:text" json:"bio"`
+	Role          string         `gorm:"size:20;default:user" json:"role"` // user / admin
 	Status        int            `gorm:"default:1" json:"status"`
 	DisableUntil  *time.Time     `json:"disable_until"`
 	Level         int            `gorm:"default:1" json:"level"`

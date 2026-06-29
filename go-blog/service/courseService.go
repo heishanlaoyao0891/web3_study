@@ -82,19 +82,7 @@ func GetCourseDetail(c *gin.Context) {
 
 	var learningRecord model.LearningRecord
 	if user != nil {
-		userMap, ok := user.(map[string]interface{})
-		if ok {
-			var userID uint
-			switch v := userMap["ID"].(type) {
-			case uint:
-				userID = v
-			case float64:
-				userID = uint(v)
-			case int:
-				userID = uint(v)
-			}
-			util.Db.Where("user_id = ? AND course_id = ?", userID, course.ID).First(&learningRecord)
-		}
+		util.Db.Where("user_id = ? AND course_id = ?", user.ID, course.ID).First(&learningRecord)
 	}
 
 	c.HTML(http.StatusOK, "course_detail.html", gin.H{
@@ -107,10 +95,9 @@ func GetCourseDetail(c *gin.Context) {
 func GetChapterDetail(c *gin.Context) {
 	user := util.GetUserFromContext(c)
 	courseID := c.Param("course_id")
-	chapterID := c.Param("chapter_id")
 
 	var chapter model.CourseChapter
-	result := util.Db.Preload("Course").First(&chapter, chapterID)
+	result := util.Db.Preload("Course").First(&chapter, c.Param("chapter_id"))
 	if result.Error != nil {
 		c.HTML(http.StatusNotFound, "index.html", gin.H{
 			"error": "章节不存在",
@@ -122,35 +109,18 @@ func GetChapterDetail(c *gin.Context) {
 	util.Db.Model(&chapter).Update("view_count", chapter.ViewCount+1)
 
 	if user != nil {
-		userMap, ok := user.(map[string]interface{})
-		if ok {
-			var userID uint
-			switch v := userMap["ID"].(type) {
-			case uint:
-				userID = v
-			case float64:
-				userID = uint(v)
-			case int:
-				userID = uint(v)
-			}
-
-			var courseIDUint uint
-			for _, ch := range courseID {
-				if ch >= '0' && ch <= '9' {
-					courseIDUint = courseIDUint*10 + uint(ch-'0')
-				}
-			}
-
+		courseIDUint, err := strconv.ParseUint(courseID, 10, 32)
+		if err == nil {
 			now := time.Now()
-			util.Db.Where("user_id = ? AND course_id = ?", userID, courseIDUint).
+			util.Db.Where("user_id = ? AND course_id = ?", user.ID, courseIDUint).
 				Assign(model.LearningRecord{
 					ChapterID:   &chapter.ID,
 					Progress:    0,
 					LastLearnAt: &now,
 				}).
 				FirstOrCreate(&model.LearningRecord{
-					UserID:      userID,
-					CourseID:    courseIDUint,
+					UserID:      user.ID,
+					CourseID:    uint(courseIDUint),
 					ChapterID:   &chapter.ID,
 					LastLearnAt: &now,
 				})
