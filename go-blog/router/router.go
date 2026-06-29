@@ -207,6 +207,15 @@ func InitRouter() *gin.Engine {
 		trendingGroup.POST("/offline/:id", service.PostTrendingOffline)
 	}
 
+	// 抓取源管理路由（仅管理员 M2.2）
+	sourceGroup := r.Group("/sources", requireAuthMiddleware())
+	{
+		sourceGroup.GET("", service.GetContentSources)
+		sourceGroup.POST("/toggle/:id", service.PostContentSourceToggle)
+		sourceGroup.POST("/delete/:id", service.PostContentSourceDelete)
+		sourceGroup.POST("/run/:id", service.PostContentSourceRunNow)
+	}
+
 	// 健康检查（M4.4 无鉴权）
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>抓取源管理 - Go博客</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { max-width: 1200px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; margin-bottom: 30px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .nav { margin: 20px 0; background: white; padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .nav-left, .nav-right { display: flex; align-items: center; }
+        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 500; transition: all 0.3s; }
+        .nav a:hover { color: #667eea; }
+        .content { max-width: 1000px; margin: 0 auto; }
+        .page-title { font-size: 24px; color: #1a1a2e; margin-bottom: 25px; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { background: #f8f9fa; font-weight: 600; color: #555; padding: 14px 16px; text-align: left; border-bottom: 2px solid #e1e5eb; font-size: 14px; }
+        .table td { padding: 14px 16px; border-bottom: 1px solid #f0f2f5; color: #333; font-size: 14px; vertical-align: middle; }
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover { background: #fafbfc; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-enabled { background: #d4edda; color: #155724; }
+        .badge-disabled { background: #f8d7da; color: #721c24; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-failed { background: #f8d7da; color: #721c24; }
+        .badge-idle { background: #fff3cd; color: #856404; }
+        .badge-type { background: #e8f4fd; color: #0c5460; }
+        .btn-sm { padding: 5px 12px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
+        .btn-sm:hover { transform: translateY(-1px); }
+        .btn-toggle-on { background: #dc3545; color: white; }
+        .btn-toggle-off { background: #28a745; color: white; }
+        .btn-run { background: #007bff; color: white; }
+        .btn-delete { background: #6c757d; color: white; }
+        .btn-delete:hover { background: #5a6268; }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .source-name { font-weight: 600; color: #1a1a2e; }
+        .source-url { color: #888; font-size: 13px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cron-badge { background: #f0f0f0; color: #666; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 9999; display: none; }
+        .empty { text-align: center; padding: 60px; color: #999; }
+        .type-icon { display: inline-block; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 6px; font-size: 14px; background: #e8f4fd; margin-right: 6px; }
+    </style>
+</head>
+<body>
+<div id="toast" style="position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:10px;z-index:9999;display:none;"></div>
+<div class="header">
+    <h1>抓取源管理</h1>
+    <p>管理外部数据源的定时抓取任务</p>
+</div>
+<div class="nav">
+    <div class="nav-left">
+        <a href="/">首页</a>
+        <a href="/article/list">文章列表</a>
+        {{ if .user }}{{ if eq .user.Role "admin" }}<a href="/user/list">用户管理</a><a href="/category/list">类别管理</a><a href="/sources">抓取源</a>{{ end }}{{ end }}
+    </div>
+    <div class="nav-right">
+        {{ if .user }}<span>欢迎，{{ .user.Username }}</span><a href="/logout">登出</a>{{ else }}<a href="/login">登录</a>{{ end }}
+    </div>
+</div>
+<div class="content">
+    <h2 class="page-title">抓取源列表</h2>
+    <div class="card">
+        {{ if .sources }}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>类型</th>
+                    <th>归属领域</th>
+                    <th>调度</th>
+                    <th>状态</th>
+                    <th>最近运行</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .sources }}
+                <tr>
+                    <td>
+                        <div class="source-name">{{ .Name }}</div>
+                        <div class="source-url" title="{{ .URL }}">{{ .URL }}</div>
+                    </td>
+                    <td><span class="badge badge-type">{{ .Type }}</span></td>
+                    <td>{{ if .DomainID }}{{ if index $.domainNames .DomainID }}{{ index $.domainNames .DomainID }}{{ else }}领域#{{ .DomainID }}{{ end }}{{ else }}-{{ end }}</td>
+                    <td><span class="cron-badge">{{ .Cron }}</span></td>
+                    <td>
+                        {{ if .Enabled }}
+                        <span class="badge badge-enabled">● 启用</span>
+                        {{ else }}
+                        <span class="badge badge-disabled">● 停用</span>
+                        {{ end }}
+                    </td>
+                    <td>
+                        {{ $status := index $.lastStatus .ID }}
+                        {{ if $status }}
+                            <span class="badge {{ if eq $status.Status "success" }}badge-success{{ else if eq $status.Status "failed" }}badge-failed{{ else }}badge-idle{{ end }}">
+                                {{ if eq $status.Status "success" }}✓ {{ $status.Count }}条{{ else if eq $status.Status "failed" }}✗ 失败{{ else }}⚪ {{ $status.Status }}{{ end }}
+                            </span>
+                        {{ else }}
+                            <span class="badge badge-idle">⚪ 未运行</span>
+                        {{ end }}
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-sm btn-run" onclick="runNow({{ .ID }})">▶ 运行</button>
+                            <button class="btn-sm {{ if .Enabled }}btn-toggle-on{{ else }}btn-toggle-off{{ end }}" onclick="toggle({{ .ID }})">
+                                {{ if .Enabled }}停用{{ else }}启用{{ end }}
+                            </button>
+                            <button class="btn-sm btn-delete" onclick="doDelete({{ .ID }}, '{{ .Name }}')">删除</button>
+                        </div>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+        {{ else }}
+        <div class="empty">暂无抓取源配置</div>
+        {{ end }}
+    </div>
+    <p style="margin-top: 15px; color: #888; font-size: 13px;">💡 新增抓取源需通过后台配置或手动 INSERT 到 <code>content_sources</code> 表</p>
+</div>
+<script>
+function showToast(msg, isErr) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.background = isErr ? '#dc3545' : '#28a745';
+    t.style.display = 'block'; t.style.color = 'white';
+    setTimeout(function(){ t.style.display='none'; }, 3000);
+}
+function toggle(id) {
+    fetch('/sources/toggle/' + id, { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d.success) location.reload(); else showToast(d.error||'操作失败', true); })
+    .catch(function(){ showToast('请求失败', true); });
+}
+function doDelete(id, name) {
+    if(!confirm('确定删除抓取源「' + name + '」？')) return;
+    fetch('/sources/delete/' + id, { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d.success) location.reload(); else showToast(d.error||'删除失败', true); })
+    .catch(function(){ showToast('请求失败', true); });
+}
+function runNow(id) {
+    fetch('/sources/run/' + id, { method: 'POST' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){ 
+        if(d.success) showToast('运行完成，入库 ' + (d.log ? d.log.saved_count : 0) + ' 条'); 
+        else showToast(d.error||'运行失败', true);
+    })
+    .catch(function(){ showToast('请求失败', true); });
+}
+</script>
+</body>
+</html>
