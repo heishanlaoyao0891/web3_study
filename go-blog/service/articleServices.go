@@ -25,6 +25,14 @@ func GetIndex(c *gin.Context) {
 	var latestArticles []model.Article
 	util.Db.Preload("User").Preload("Category").Preload("Categories").Order("created_at desc").Limit(5).Find(&latestArticles)
 
+	// 热门标签（M1.4：从 DB 取，替代硬编码）
+	var hotTags []model.Tag
+	util.Db.Order("use_count desc, id asc").Limit(10).Find(&hotTags)
+
+	// 技术领域（顶层分类，供导航展示）
+	var domains []model.Category
+	util.Db.Where("parent_id IS NULL").Order("sort_order desc, id asc").Find(&domains)
+
 	// 加载站点配置（M1.3 首页文案去硬编码）
 	siteConfig := loadSiteConfig()
 
@@ -37,7 +45,9 @@ func GetIndex(c *gin.Context) {
 			"userCount":     userCount,
 		},
 		"latestArticles": latestArticles,
-		"site":           siteConfig,
+		"hotTags":         hotTags,
+		"domains":         domains,
+		"site":            siteConfig,
 	})
 }
 

@@ -20,6 +20,10 @@
         .nav .user-info { display: flex; align-items: center; gap: 15px; }
         .nav .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
         .nav .user-level { background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%); color: #333; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+        .domain-tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .domain-tab { padding: 8px 20px; background: white; border-radius: 20px; font-size: 14px; color: #555; text-decoration: none; font-weight: 600; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: all 0.3s; }
+        .domain-tab:hover { background: #667eea; color: white; }
+        .domain-tab.active { background: #667eea; color: white; }
         .intro-section { background: white; padding: 40px; border-radius: 20px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
         .intro-section h2 { color: #1a1a2e; margin-bottom: 20px; font-size: 24px; }
         .intro-section ul { list-style: none; }
@@ -83,8 +87,8 @@
 <div class="toast" id="toast"></div>
 
 <div class="header">
-    <h1>Web3技术社区</h1>
-    <p>Solidity智能合约 | DeFi协议开发 | NFT铸造交易 | 区块链安全</p>
+    <h1>{{ .site.site_title }}</h1>
+    <p>{{ .site.site_subtitle }}</p>
 </div>
 
 <div class="nav">
@@ -97,7 +101,7 @@
         <a href="/snippets">代码</a>
         <a href="/resources">资源</a>
         {{ if .user }}
-            {{ if eq .user.Username "admin" }}
+            {{ if eq .user.Role "admin" }}
             <a href="/user/list">管理</a>
             {{ end }}
         {{ end }}
@@ -118,15 +122,23 @@
     </div>
 </div>
 
+{{ if .domains }}
+<div class="domain-tabs">
+    <a href="/article/list" class="domain-tab">全部</a>
+    {{ range .domains }}
+    <a href="/article/list?domain={{ .ID }}" class="domain-tab">{{ if .Icon }}{{ .Icon }} {{ end }}{{ .Name }}</a>
+    {{ end }}
+</div>
+{{ end }}
+
 <div class="intro-section">
-    <h2>Web3开发者社区</h2>
+    <h2>{{ .site.site_intro_title }}</h2>
     <ul>
-        <li>Solidity智能合约开发教程与最佳实践</li>
-        <li>DeFi协议原理分析：Uniswap、Aave、Compound等</li>
-        <li>NFT开发实战：ERC-721、ERC-1155、版税机制</li>
-        <li>智能合约安全审计与漏洞分析</li>
-        <li>Layer2扩容方案：Optimism、Arbitrum、zkSync</li>
-        <li>Web3面试题库与求职指南</li>
+        <li>多技术领域学习路径：Java / Go / Python / AI / Web3</li>
+        <li>面试题库与求职指南，覆盖主流技术栈</li>
+        <li>最新技术资讯推送，紧跟行业热点</li>
+        <li>问答社区，与开发者一起交流成长</li>
+        <li>代码片段与模板，提升开发效率</li>
     </ul>
 </div>
 
@@ -218,13 +230,13 @@
         <div class="hot-tags">
             <h3>热门标签</h3>
             <div class="tags-list" id="hotTags">
-                <a href="/article/list?keyword=Solidity" class="tag-item">Solidity</a>
-                <a href="/article/list?keyword=DeFi" class="tag-item">DeFi</a>
-                <a href="/article/list?keyword=NFT" class="tag-item">NFT</a>
-                <a href="/article/list?keyword=Layer2" class="tag-item">Layer2</a>
-                <a href="/article/list?keyword=智能合约" class="tag-item">智能合约</a>
-                <a href="/article/list?keyword=安全审计" class="tag-item">安全审计</a>
-                <a href="/article/list?keyword=Uniswap" class="tag-item">Uniswap</a>
+                {{ if .hotTags }}
+                    {{ range .hotTags }}
+                    <a href="/article/list?keyword={{ .Name }}" class="tag-item">{{ .Name }}</a>
+                    {{ end }}
+                {{ else }}
+                <a href="/article/list" class="tag-item">暂无标签</a>
+                {{ end }}
             </div>
         </div>
         
@@ -233,15 +245,15 @@
             <a href="/learning-paths">🎯 学习路径</a>
             <a href="/interview">📝 面试题库</a>
             <a href="/snippets">💻 代码片段</a>
-            <a href="/templates">📄 合约模板</a>
+            <a href="/templates">📄 代码模板</a>
             <a href="/resources">🔗 资源导航</a>
         </div>
     </div>
 </div>
 
 <div class="footer">
-    <p>© 2026 Web3技术社区 | 基于 Go + Gin + GORM 开发</p>
-    <p style="margin-top: 10px;">专注区块链开发 | 智能合约安全 | DeFi协议研究</p>
+    <p>{{ .site.footer_text }}</p>
+    <p style="margin-top: 10px;">{{ .site.footer_subtext }}</p>
 </div>
 
 <script>
