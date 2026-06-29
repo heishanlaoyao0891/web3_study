@@ -159,6 +159,7 @@ func InitRouter() *gin.Engine {
 		apiGroup.POST("/checkin", requireAuthMiddleware(), service.PostCheckin)
 		apiGroup.GET("/checkin/status", service.GetCheckinStatus)
 		apiGroup.GET("/checkin/rank", service.GetCheckinRank)
+		apiGroup.GET("/trending", service.GetTrendingTopicsAPI) // M3.1 风口话题
 	}
 
 	// 问答路由
@@ -196,6 +197,15 @@ func InitRouter() *gin.Engine {
 	// 面试题库
 	r.GET("/interview", service.GetInterviewQuestions)
 	r.GET("/interview/:id", service.GetInterviewQuestionDetail)
+
+	// 风口话题管理路由（仅管理员）
+	trendingGroup := r.Group("/trending", requireAuthMiddleware())
+	{
+		trendingGroup.GET("/list", service.GetTrendingAdminPage)
+		trendingGroup.POST("/create", service.PostTrendingCreate)
+		trendingGroup.POST("/delete/:id", service.PostTrendingDelete)
+		trendingGroup.POST("/offline/:id", service.PostTrendingOffline)
+	}
 
 	return r
 }

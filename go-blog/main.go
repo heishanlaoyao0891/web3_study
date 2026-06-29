@@ -150,6 +150,7 @@ func main() {
 		&model.ContractTemplate{},
 		&model.Resource{},
 		&model.InterviewQuestion{},
+		&model.TrendingTopic{}, // M3.1 风口话题
 	)
 	if err != nil {
 		println("表迁移警告：" + err.Error())
