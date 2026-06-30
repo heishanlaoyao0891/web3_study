@@ -92,6 +92,9 @@ func InitRouter() *gin.Engine {
 		},
 	})
 
+	// 静态文件服务（CSS / JS）
+	r.Static("/static", "./static")
+
 	// 加载模板文件
 	r.LoadHTMLGlob("templates/*")
 

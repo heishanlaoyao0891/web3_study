@@ -186,6 +186,7 @@ func GetInterviewQuestions(c *gin.Context) {
 func GetInterviewQuestionDetail(c *gin.Context) {
 	user := util.GetUserFromContext(c)
 	id, _ := strconv.Atoi(c.Param("id"))
+	domainID := c.Query("domain") // 保留领域上下文用于返回
 
 	var question model.InterviewQuestion
 	result := util.Db.Preload("Categories").First(&question, id)
@@ -198,8 +199,9 @@ func GetInterviewQuestionDetail(c *gin.Context) {
 	util.Db.Model(&question).Update("view_count", question.ViewCount+1)
 
 	c.HTML(http.StatusOK, "interview_question_detail.html", gin.H{
-		"title":    question.Title,
-		"question": question,
-		"user":     user,
+		"title":         question.Title,
+		"question":      question,
+		"user":          user,
+		"currentDomain": domainID,
 	})
 }

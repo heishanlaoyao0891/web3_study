@@ -2,42 +2,41 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>{{ .title }} - Web3面试题</title>
+    <title>{{ .title }} - 技术面试题</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/app.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { max-width: 900px; margin: 0 auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; }
-        .nav { background: white; padding: 18px 30px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; justify-content: space-between; }
-        .nav a { margin-right: 25px; text-decoration: none; color: #333; font-weight: 600; }
-        .nav a:hover { color: #667eea; }
-        .question-detail { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .question-title { font-size: 28px; font-weight: 700; color: #1a1a2e; margin-bottom: 20px; }
-        .question-meta { font-size: 14px; color: #888; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
-        .question-meta span { margin-right: 20px; }
-        .difficulty-1 { color: #28a745; }
-        .difficulty-2 { color: #ffc107; }
-        .difficulty-3 { color: #dc3545; }
-        .section { margin-bottom: 30px; }
-        .section-title { font-size: 20px; font-weight: 600; color: #1a1a2e; margin-bottom: 15px; padding-left: 15px; border-left: 4px solid #667eea; }
-        .section-content { color: #333; line-height: 1.8; white-space: pre-wrap; }
-        .answer-box { background: #f8f9fa; padding: 25px; border-radius: 12px; }
-        .footer { text-align: center; padding: 40px 0; color: #888; }
-        .back-btn { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; margin-top: 20px; }
+        .detail-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: 40px; box-shadow: var(--shadow-md); }
+        .detail-title { font-size: 28px; font-weight: 800; color: var(--c-text); margin-bottom: 16px; }
+        .detail-meta { font-size: 14px; color: var(--c-text-muted); margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--c-border-soft); }
+        .detail-meta span { margin-right: 20px; }
+        .detail-section { margin-bottom: 30px; }
+        .detail-section-title { font-size: 18px; font-weight: 700; color: var(--c-text); margin-bottom: 14px; padding-left: 12px; border-left: 3px solid var(--c-indigo); }
+        .detail-section-content { color: #334155; line-height: 1.8; white-space: pre-wrap; }
+        .answer-box { background: var(--c-indigo-50); padding: 24px; border-radius: var(--radius); }
     </style>
 </head>
 <body>
-<div class="nav">
-    <div>
-        <a href="/">首页</a>
-        <a href="/interview">面试题</a>
-        <a href="/article/list">文章</a>
-    </div>
-</div>
+<div class="container" style="max-width: 900px; padding: 20px;">
 
-<div class="question-detail">
-    <div class="question-title">{{ .question.Title }}</div>
-    <div class="question-meta">
-        <span class="difficulty-{{ .question.Difficulty }}">{{ if eq .question.Difficulty 1 }}简单{{ else if eq .question.Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
-        <span>分类: 
+<nav class="app-nav">
+    <div class="nav-links">
+        <a href="/">首页</a>
+        <a href="/interview" class="active">面试题</a>
+        <a href="/article/list">文章</a>
+        <a href="/qa/list">问答</a>
+        <a href="/learning-paths">学习</a>
+        <a href="/snippets">代码</a>
+        <a href="/resources">资源</a>
+    </div>
+</nav>
+
+<div class="detail-card">
+    <div class="detail-title">{{ .question.Title }}</div>
+    <div class="detail-meta">
+        <span class="diff-badge diff-{{ .question.Difficulty }}">{{ if eq .question.Difficulty 1 }}简单{{ else if eq .question.Difficulty 2 }}中等{{ else }}困难{{ end }}</span>
+        <span>分类:
             {{ if .question.Categories }}
                 {{ range $index, $cat := .question.Categories }}{{ if $index }}, {{ end }}{{ $cat.Name }}{{ end }}
             {{ else }}
@@ -46,24 +45,27 @@
         </span>
         <span>浏览: {{ .question.ViewCount }}</span>
     </div>
-    
-    <div class="section">
-        <div class="section-title">问题描述</div>
-        <div class="section-content">{{ .question.Content }}</div>
+
+    <div class="detail-section">
+        <div class="detail-section-title">问题描述</div>
+        <div class="detail-section-content">{{ .question.Content }}</div>
     </div>
-    
+
     {{ if .question.Answer }}
-    <div class="section">
-        <div class="section-title">参考答案</div>
-        <div class="section-content answer-box">{{ .question.Answer }}</div>
+    <div class="detail-section">
+        <div class="detail-section-title">参考答案</div>
+        <div class="detail-section-content answer-box">{{ .question.Answer }}</div>
     </div>
     {{ end }}
-    
-    <a href="/interview" class="back-btn">返回题库</a>
+
+    <a href="/interview{{ if .currentDomain }}?domain={{ .currentDomain }}{{ end }}" class="btn-indigo" style="margin-top: 20px;">返回题库</a>
 </div>
 
-<div class="footer">
-    <p>© 2026 Web3技术社区</p>
+<div class="app-footer">
+    <p>© 2026 技术学习社区</p>
 </div>
+
+</div>
+<script src="/static/js/app.js"></script>
 </body>
 </html>
